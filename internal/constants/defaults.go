@@ -84,31 +84,31 @@ func GetFingerprintData() ([]interface{}, error) {
 	return interfaceData, nil
 }
 
-var ModulesConfig = `maxGoroutineCount: 3 # 最大目标并发
+var ModulesConfig = `maxGoroutineCount: 3 # 최대 대상 동시 처리 수
 subdomainScan:
-  goroutineCount: 3  # 设置"子域名扫描"模块最大并发
+  goroutineCount: 3  # "서브도메인 스캔" 모듈의 최대 동시 실행 수 설정
 subdomainSecurity:
-  goroutineCount: 10  # 设置"子域名结果处理"模块最大并发
+  goroutineCount: 10  # "서브도메인 결과 처리" 모듈의 최대 동시 실행 수 설정
 assetMapping:
-  goroutineCount: 5  # 设置"资产测绘"模块最大并发
+  goroutineCount: 5  # "자산 매핑" 모듈의 최대 동시 실행 수 설정
 assetHandle:
-  goroutineCount: 30  # 设置"资产结果处理"模块最大并发
+  goroutineCount: 30  # "자산 결과 처리" 모듈의 최대 동시 실행 수 설정
 portScanPreparation:
-  goroutineCount: 30  # 设置"端口扫描预处理"模块最大并发
+  goroutineCount: 30  # "포트 스캔 전처리" 모듈의 최대 동시 실행 수 설정
 portScan:
-  goroutineCount: 2  # 设置"端口扫描"模块最大并发
+  goroutineCount: 2  # "포트 스캔" 모듈의 최대 동시 실행 수 설정
 portFingerprint:
-  goroutineCount: 10  # 设置"端口指纹识别"模块最大并发
+  goroutineCount: 10  # "포트 핑거프린트 식별" 모듈의 최대 동시 실행 수 설정
 URLScan:
-  goroutineCount: 5  # 设置"URL扫描"模块最大并发
+  goroutineCount: 5  # "URL 스캔" 모듈의 최대 동시 실행 수 설정
 URLSecurity:
-  goroutineCount: 15  # 设置"URL扫描结果处理"模块最大并发
+  goroutineCount: 15  # "URL 스캔 결과 처리" 모듈의 최대 동시 실행 수 설정
 webCrawler:
-  goroutineCount: 2  # 设置"爬虫扫描"模块最大并发
+  goroutineCount: 2  # "크롤러 스캔" 모듈의 최대 동시 실행 수 설정
 dirScan:
-  goroutineCount: 3  # 设置"目录扫描"模块最大并发
+  goroutineCount: 3  # "디렉터리 스캔" 모듈의 최대 동시 실행 수 설정
 vulnerabilityScan:
-  goroutineCount: 2  # 设置"漏洞扫描"模块最大并发`
+  goroutineCount: 2  # "취약점 스캔" 모듈의 최대 동시 실행 수 설정`
 
 var Plugins = []models.Plugin{
 	{
@@ -116,8 +116,8 @@ var Plugins = []models.Plugin{
 		Name:         "WebFingerprint",
 		Hash:         "80718cc3fcb4827d942e6300184707e2",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "web指纹识别",
+		Help:         "매개변수 필요 없음",
+		Introduction: "web 핑거프린트 식별",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -127,8 +127,8 @@ var Plugins = []models.Plugin{
 		Name:         "httpx",
 		Hash:         "3a0d994a12305cb15a5cb7104d819623",
 		Parameter:    "-cdncheck true -screenshot false -tlsprobe false",
-		Help:         "-cdncheck 是否开启cdn检测 -screenshot 是否开启截图，默认关闭,开启需要安装chromium -tlsprobe 从tls信息发送http探测默认true",
-		Introduction: "资产测绘",
+		Help:         "-cdncheck cdn 탐지 활성화 여부 -screenshot 스크린샷 활성화 여부, 기본값은 비활성화, 활성화하려면 chromium 설치 필요 -tlsprobe tls 정보로부터 http 탐지 요청 전송, 기본값 true",
+		Introduction: "자산 매핑",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -138,8 +138,8 @@ var Plugins = []models.Plugin{
 		Name:         "SentryDir",
 		Hash:         "920546788addc6d29ea63e4a314a1b85",
 		Parameter:    "-d {dict.dir.default} -t 10",
-		Help:         "-d 目录扫描字典 -t 扫描并发限制",
-		Introduction: "目录扫描",
+		Help:         "-d 디렉터리 스캔 사전 -t 스캔 동시 실행 제한",
+		Introduction: "디렉터리 스캔",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -149,8 +149,8 @@ var Plugins = []models.Plugin{
 		Name:         "fingerprintx",
 		Hash:         "648a6f49eed57b1737ac702e02985b00",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "端口指纹识别",
+		Help:         "매개변수 필요 없음",
+		Introduction: "포트 핑거프린트 식별",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -160,8 +160,8 @@ var Plugins = []models.Plugin{
 		Name:         "RustScan",
 		Hash:         "66b4ddeb983387df2b7ee7726653874d",
 		Parameter:    "-port {port.top1000} -b 500 -t 5000",
-		Help:         "-port 端口扫描范围 -b 端口扫描并发数量  -t 超时时间",
-		Introduction: "端口存活扫描",
+		Help:         "-port 포트 스캔 범위 -b 포트 스캔 동시 실행 수  -t 타임아웃 시간",
+		Introduction: "포트 활성 스캔",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -171,8 +171,8 @@ var Plugins = []models.Plugin{
 		Name:         "SkipCdn",
 		Hash:         "9b91e0f18ac9043ec9fe250a39b4a2d9",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "检测是否cdn，跳过cdn的端口扫描",
+		Help:         "매개변수 필요 없음",
+		Introduction: "cdn 여부를 탐지하여 cdn의 포트 스캔을 건너뜀",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -182,8 +182,8 @@ var Plugins = []models.Plugin{
 		Name:         "subfinder",
 		Hash:         "d60ba73c70aac430a0a54e796e7e19b8",
 		Parameter:    "-t 10 -timeout 20 -max-time 10",
-		Help:         "-t 扫描线程  -timeout 超时时间 -max-time 最大等待时间",
-		Introduction: "子域名扫描",
+		Help:         "-t 스캔 스레드  -timeout 타임아웃 시간 -max-time 최대 대기 시간",
+		Introduction: "서브도메인 스캔",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -193,8 +193,8 @@ var Plugins = []models.Plugin{
 		Name:         "ksubdomain",
 		Hash:         "e8f55f5e0e9f4af1ca40eb19048b8c82",
 		Parameter:    "-subfile {dict.subdomain.default} -et 60",
-		Help:         "-subfile 子域名字典 -et 最长运行时间(分钟)",
-		Introduction: "子域名爆破",
+		Help:         "-subfile 서브도메인 사전 -et 최대 실행 시간(분)",
+		Introduction: "서브도메인 브루트포스",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -204,8 +204,8 @@ var Plugins = []models.Plugin{
 		Name:         "SubdomainTakeover",
 		Hash:         "c0c71c101271f38b8be1767f3626d291",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "子域名接管检测",
+		Help:         "매개변수 필요 없음",
+		Introduction: "서브도메인 탈취 탐지",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -215,8 +215,8 @@ var Plugins = []models.Plugin{
 		Name:         "wayback",
 		Hash:         "ef244b3462744dad3040f9dcf3194eb1",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "url扫描从Waybackarchive、Alienvault、Commoncrawl获取历史url",
+		Help:         "매개변수 필요 없음",
+		Introduction: "url 스캔: Waybackarchive, Alienvault, Commoncrawl에서 과거 url 수집",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -226,8 +226,8 @@ var Plugins = []models.Plugin{
 		Name:         "katana",
 		Hash:         "9669d0dcc52a5ca6dbbe580ffc99c364",
 		Parameter:    "-t 10 -timeout 5 -depth 5 -et 20 -rs 3",
-		Help:         "-t 并发数 -timeout 超时时间 -et 最长运行时间(分钟) -rs 读取页面大小(MB)",
-		Introduction: "url爬取",
+		Help:         "-t 동시 실행 수 -timeout 타임아웃 시간 -et 최대 실행 시간(분) -rs 읽을 페이지 크기(MB)",
+		Introduction: "url 크롤링",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -237,8 +237,8 @@ var Plugins = []models.Plugin{
 		Name:         "sensitive",
 		Hash:         "2949994c04a4e124b9c98383489510f0",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "敏感信息泄露检测",
+		Help:         "매개변수 필요 없음",
+		Introduction: "민감 정보 유출 탐지",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -248,8 +248,8 @@ var Plugins = []models.Plugin{
 		Name:         "PageMonitoring",
 		Hash:         "e52b8b16d49912ca564c22319c495403",
 		Parameter:    "",
-		Help:         "无需参数",
-		Introduction: "页面监控，将所有url放入页面监控的计划任务中",
+		Help:         "매개변수 필요 없음",
+		Introduction: "페이지 모니터링, 모든 url을 페이지 모니터링 예약 작업에 추가",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -259,8 +259,8 @@ var Plugins = []models.Plugin{
 		Name:         "trufflehog",
 		Hash:         "1aa212b9578dc3fb1409ee8de8ed005e",
 		Parameter:    "-pdf false -verify false",
-		Help:         "-pdf 开启pdf检测 -exclude 排除提取的规则(name1,name2) -verify 是否进行验证（验证通过再统计结果）",
-		Introduction: "trufflehog密钥提取，如果设置了排除规则，需要重新安装才能重新启用被排除的规则",
+		Help:         "-pdf pdf 탐지 활성화 -exclude 추출에서 제외할 규칙(name1,name2) -verify 검증 수행 여부 (검증을 통과한 결과만 집계)",
+		Introduction: "trufflehog 비밀 키 추출. 제외 규칙을 설정한 경우, 제외된 규칙을 다시 활성화하려면 재설치해야 함",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -270,8 +270,8 @@ var Plugins = []models.Plugin{
 		Name:         "nuclei",
 		Hash:         "ed93b8af6b72fe54a60efdb932cf6fbc",
 		Parameter:    "-s high,critical",
-		Help:         "参考官方支持t, s, es, tags, etags, rl, rld, bs, c, hbs, headc, jsc, pc, prc参数",
-		Introduction: "漏洞扫描",
+		Help:         "공식 문서에서 지원하는 t, s, es, tags, etags, rl, rld, bs, c, hbs, headc, jsc, pc, prc 매개변수 참고",
+		Introduction: "취약점 스캔",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -281,8 +281,8 @@ var Plugins = []models.Plugin{
 		Name:         "rad",
 		Hash:         "4b292861d3228af0e4da8e7ef979497c",
 		Parameter:    "",
-		Help:         "参考插件市场说明",
-		Introduction: "爬虫",
+		Help:         "플러그인 마켓 설명 참고",
+		Introduction: "크롤러",
 		IsSystem:     true,
 		Version:      "1.0",
 		Source:       "",
@@ -412,67 +412,67 @@ virustotal: []
 whoisxmlapi: []
 zoomeyeapi: []`
 
-var RadConfig = `exec_path: ""                     # 启动chrome的路径
-disable_headless: false           # 禁用无头模式
-subdomain: false                   # 是否自动爬取子域
-leakless: true                    # 实验性功能，防止内存泄露，可能造成卡住的现象
-force_sandbox: false              # 强制开启sandbox；为 false 时默认开启沙箱，但在容器中会关闭沙箱。为true时强制启用沙箱，可能导致在docker中无法使用。
-enable_image: false               # 启用图片显示
-parent_path_detect: false          # 是否启用父目录探测功能
-proxy: ""                         # 代理配置
-user_agent: ""                    # 请求user-agent配置
-domain_headers:                   # 请求头配置:[]{domain,map[headerKey]HeaderValue}
-- domain: '*'                     # 为哪些域名设置header，glob语法
-headers: {}                     # 请求头，map[key]value
-max_depth: 5                     # 最大页面深度限制
-navigate_timeout_second: 5       # 访问超时时间，单位秒
-load_timeout_second: 5           # 加载超时时间，单位秒
-retry: 0                          # 页面访问失败后的重试次数
-page_analyze_timeout_second: 10  # 页面分析超时时间，单位秒
-max_interactive: 100             # 单个页面最大交互次数
-max_interactive_depth: 5         # 页面交互深度限制
-max_page_concurrent: 5           # 最大页面并发（不大于10）
-max_page_visit: 1000              # 总共允许访问的页面数量
-max_page_visit_per_site: 500     # 每个站点最多访问的页面数量
-element_filter_strength: 3        # 过滤同站点相似元素强度，1-7取值，强度逐步增大，为0时不进行跨页面元素过滤
-new_task_filter_config:           # 检查某个链接是否应该被加入爬取队列
-hostname_allowed: []            # 允许访问的 Hostname，支持格式如 t.com、*.t.com、1.1.1.1、1.1.1.1/24、1.1-4.1.1-8
-hostname_disallowed: []         # 不允许访问的 Hostname，支持格式如 t.com、*.t.com、1.1.1.1、1.1.1.1/24、1.1-4.1.1-8
-port_allowed: []                # 允许访问的端口, 支持的格式如: 80、80-85
-port_disallowed: []             # 不允许访问的端口, 支持的格式如: 80、80-85
-path_allowed: []                # 允许访问的路径，支持的格式如: test、*test*
-path_disallowed: []             # 不允许访问的路径, 支持的格式如: test、*test*
-query_key_allowed: []           # 允许访问的 Query Key，支持的格式如: test、*test*
-query_key_disallowed: []        # 不允许访问的 Query Key, 支持的格式如: test、*test*
-fragment_allowed: []            # 允许访问的 Fragment, 支持的格式如: test、*test*
-fragment_disallowed: []         # 不允许访问的 Fragment, 支持的格式如: test、*test*
-post_key_allowed: []            # 允许访问的 Post Body 中的参数, 支持的格式如: test、*test*
-post_key_disallowed: []         # 不允许访问的 Post Body 中的参数, 支持的格式如: test、*test*
-request_send_filter_config:       # 检查某个请求是否应该被发送
-hostname_allowed: []            # 允许访问的 Hostname，支持格式如 t.com、*.t.com、1.1.1.1、1.1.1.1/24、1.1-4.1.1-8
-hostname_disallowed: []         # 不允许访问的 Hostname，支持格式如 t.com、*.t.com、1.1.1.1、1.1.1.1/24、1.1-4.1.1-8
-port_allowed: []                # 允许访问的端口, 支持的格式如: 80、80-85
-port_disallowed: []             # 不允许访问的端口, 支持的格式如: 80、80-85
-path_allowed: []                # 允许访问的路径，支持的格式如: test、*test*
-path_disallowed: []             # 不允许访问的路径, 支持的格式如: test、*test*
-query_key_allowed: []           # 允许访问的 Query Key，支持的格式如: test、*test*
-query_key_disallowed: []        # 不允许访问的 Query Key, 支持的格式如: test、*test*
-fragment_allowed: []            # 允许访问的 Fragment, 支持的格式如: test、*test*
-fragment_disallowed: []         # 不允许访问的 Fragment, 支持的格式如: test、*test*
-post_key_allowed: []            # 允许访问的 Post Body 中的参数, 支持的格式如: test、*test*
-post_key_disallowed: []         # 不允许访问的 Post Body 中的参数, 支持的格式如: test、*test*
-request_output_filter_config:     # 检查某个请求是否应该被输出
-hostname_allowed: []            # 允许访问的 Hostname，支持格式如 t.com、*.t.com、1.1.1.1、1.1.1.1/24、1.1-4.1.1-8
-hostname_disallowed: []         # 不允许访问的 Hostname，支持格式如 t.com、*.t.com、1.1.1.1、1.1.1.1/24、1.1-4.1.1-8
-port_allowed: []                # 允许访问的端口, 支持的格式如: 80、80-85
-port_disallowed: []             # 不允许访问的端口, 支持的格式如: 80、80-85
-path_allowed: []                # 允许访问的路径，支持的格式如: test、*test*
-path_disallowed: []             # 不允许访问的路径, 支持的格式如: test、*test*
-query_key_allowed: []           # 允许访问的 Query Key，支持的格式如: test、*test*
-query_key_disallowed: []        # 不允许访问的 Query Key, 支持的格式如: test、*test*
-fragment_allowed: []            # 允许访问的 Fragment, 支持的格式如: test、*test*
-fragment_disallowed: []         # 不允许访问的 Fragment, 支持的格式如: test、*test*
-post_key_allowed: []            # 允许访问的 Post Body 中的参数, 支持的格式如: test、*test*
-post_key_disallowed: []         # 不允许访问的 Post Body 中的参数, 支持的格式如: test、*test*
-entrance_retry: 0                 # 入口重试次数
-max_similar_request: 0            # 最大相似fetch/XHR请求数（小于等于0时不限制）`
+var RadConfig = `exec_path: ""                     # chrome 실행 경로
+disable_headless: false           # 헤드리스 모드 비활성화
+subdomain: false                   # 서브도메인 자동 크롤링 여부
+leakless: true                    # 실험적 기능: 메모리 누수를 방지하지만, 멈춤 현상이 발생할 수 있음
+force_sandbox: false              # sandbox 강제 활성화. false이면 기본적으로 샌드박스를 활성화하지만 컨테이너에서는 비활성화함. true이면 샌드박스를 강제로 활성화하며, docker에서 사용할 수 없을 수 있음.
+enable_image: false               # 이미지 표시 활성화
+parent_path_detect: false          # 상위 디렉터리 탐지 기능 활성화 여부
+proxy: ""                         # 프록시 설정
+user_agent: ""                    # 요청 user-agent 설정
+domain_headers:                   # 요청 헤더 설정:[]{domain,map[headerKey]HeaderValue}
+- domain: '*'                     # header를 설정할 도메인, glob 문법
+headers: {}                     # 요청 헤더, map[key]value
+max_depth: 5                     # 최대 페이지 깊이 제한
+navigate_timeout_second: 5       # 접속 타임아웃 시간(초)
+load_timeout_second: 5           # 로딩 타임아웃 시간(초)
+retry: 0                          # 페이지 접속 실패 시 재시도 횟수
+page_analyze_timeout_second: 10  # 페이지 분석 타임아웃 시간(초)
+max_interactive: 100             # 단일 페이지 최대 상호작용 횟수
+max_interactive_depth: 5         # 페이지 상호작용 깊이 제한
+max_page_concurrent: 5           # 최대 페이지 동시 처리 수(10 이하)
+max_page_visit: 1000              # 전체 방문 허용 페이지 수
+max_page_visit_per_site: 500     # 사이트별 최대 방문 페이지 수
+element_filter_strength: 3        # 동일 사이트 내 유사 요소 필터링 강도, 1-7 값이며 클수록 강해짐, 0이면 페이지 간 요소 필터링을 하지 않음
+new_task_filter_config:           # 특정 링크를 크롤링 큐에 추가할지 검사
+hostname_allowed: []            # 접근을 허용할 Hostname, 지원 형식 예: t.com, *.t.com, 1.1.1.1, 1.1.1.1/24, 1.1-4.1.1-8
+hostname_disallowed: []         # 접근을 허용하지 않을 Hostname, 지원 형식 예: t.com, *.t.com, 1.1.1.1, 1.1.1.1/24, 1.1-4.1.1-8
+port_allowed: []                # 접근을 허용할 포트, 지원 형식 예: 80, 80-85
+port_disallowed: []             # 접근을 허용하지 않을 포트, 지원 형식 예: 80, 80-85
+path_allowed: []                # 접근을 허용할 경로, 지원 형식 예: test, *test*
+path_disallowed: []             # 접근을 허용하지 않을 경로, 지원 형식 예: test, *test*
+query_key_allowed: []           # 접근을 허용할 Query Key, 지원 형식 예: test, *test*
+query_key_disallowed: []        # 접근을 허용하지 않을 Query Key, 지원 형식 예: test, *test*
+fragment_allowed: []            # 접근을 허용할 Fragment, 지원 형식 예: test, *test*
+fragment_disallowed: []         # 접근을 허용하지 않을 Fragment, 지원 형식 예: test, *test*
+post_key_allowed: []            # 접근을 허용할 Post Body 내 매개변수, 지원 형식 예: test, *test*
+post_key_disallowed: []         # 접근을 허용하지 않을 Post Body 내 매개변수, 지원 형식 예: test, *test*
+request_send_filter_config:       # 특정 요청을 전송할지 검사
+hostname_allowed: []            # 접근을 허용할 Hostname, 지원 형식 예: t.com, *.t.com, 1.1.1.1, 1.1.1.1/24, 1.1-4.1.1-8
+hostname_disallowed: []         # 접근을 허용하지 않을 Hostname, 지원 형식 예: t.com, *.t.com, 1.1.1.1, 1.1.1.1/24, 1.1-4.1.1-8
+port_allowed: []                # 접근을 허용할 포트, 지원 형식 예: 80, 80-85
+port_disallowed: []             # 접근을 허용하지 않을 포트, 지원 형식 예: 80, 80-85
+path_allowed: []                # 접근을 허용할 경로, 지원 형식 예: test, *test*
+path_disallowed: []             # 접근을 허용하지 않을 경로, 지원 형식 예: test, *test*
+query_key_allowed: []           # 접근을 허용할 Query Key, 지원 형식 예: test, *test*
+query_key_disallowed: []        # 접근을 허용하지 않을 Query Key, 지원 형식 예: test, *test*
+fragment_allowed: []            # 접근을 허용할 Fragment, 지원 형식 예: test, *test*
+fragment_disallowed: []         # 접근을 허용하지 않을 Fragment, 지원 형식 예: test, *test*
+post_key_allowed: []            # 접근을 허용할 Post Body 내 매개변수, 지원 형식 예: test, *test*
+post_key_disallowed: []         # 접근을 허용하지 않을 Post Body 내 매개변수, 지원 형식 예: test, *test*
+request_output_filter_config:     # 특정 요청을 출력할지 검사
+hostname_allowed: []            # 접근을 허용할 Hostname, 지원 형식 예: t.com, *.t.com, 1.1.1.1, 1.1.1.1/24, 1.1-4.1.1-8
+hostname_disallowed: []         # 접근을 허용하지 않을 Hostname, 지원 형식 예: t.com, *.t.com, 1.1.1.1, 1.1.1.1/24, 1.1-4.1.1-8
+port_allowed: []                # 접근을 허용할 포트, 지원 형식 예: 80, 80-85
+port_disallowed: []             # 접근을 허용하지 않을 포트, 지원 형식 예: 80, 80-85
+path_allowed: []                # 접근을 허용할 경로, 지원 형식 예: test, *test*
+path_disallowed: []             # 접근을 허용하지 않을 경로, 지원 형식 예: test, *test*
+query_key_allowed: []           # 접근을 허용할 Query Key, 지원 형식 예: test, *test*
+query_key_disallowed: []        # 접근을 허용하지 않을 Query Key, 지원 형식 예: test, *test*
+fragment_allowed: []            # 접근을 허용할 Fragment, 지원 형식 예: test, *test*
+fragment_disallowed: []         # 접근을 허용하지 않을 Fragment, 지원 형식 예: test, *test*
+post_key_allowed: []            # 접근을 허용할 Post Body 내 매개변수, 지원 형식 예: test, *test*
+post_key_disallowed: []         # 접근을 허용하지 않을 Post Body 내 매개변수, 지원 형식 예: test, *test*
+entrance_retry: 0                 # 진입점 재시도 횟수
+max_similar_request: 0            # 최대 유사 fetch/XHR 요청 수(0 이하이면 제한 없음)`

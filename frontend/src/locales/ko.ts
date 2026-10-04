@@ -558,6 +558,7 @@ export default {
       'API Key는 MCP 클라이언트(예: Cursor)가 ScopeSentry에 인증하는 데 사용됩니다. 생성 후 MCP 클라이언트 헤더에 키를 설정하세요.'
   },
   configuration: {
+    moduleConfig: '모듈 설정',
     subfinder: 'subfinder 설정',
     rad: 'rad 설정',
     system: '시스템 설정',

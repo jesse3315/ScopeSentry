@@ -376,7 +376,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
         component: () => import('@/views/about.vue'),
         name: 'About ScopeSentry',
         meta: {
-          title: 'About',
+          title: t('common.about'),
           icon: 'carbon:deploy-rules',
           noCache: true
         }

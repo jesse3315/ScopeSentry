@@ -37,7 +37,7 @@ const taskColums = reactive<TableColumn[]>([
   },
   {
     field: 'name',
-    label: 'Name',
+    label: t('common.name'),
     minWidth: 20
   },
   {
