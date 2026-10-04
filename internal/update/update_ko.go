@@ -6,6 +6,7 @@ import (
 
 	"github.com/Autumn-27/ScopeSentry/internal/constants"
 	"github.com/Autumn-27/ScopeSentry/internal/database/mongodb"
+	"github.com/Autumn-27/ScopeSentry/internal/i18n"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -68,5 +69,23 @@ func UpdateSensitiveRuleNames() {
 			continue
 		}
 		_, _ = results.UpdateMany(ctx, bson.M{"sid": oldName}, bson.M{"$set": bson.M{"sid": newName}})
+	}
+}
+
+// 기존 설치본의 ModulesConfig/RadConfig 에 남은 중국어 기본 주석을 한국어로 바꿉니다(값은 유지).
+func UpdateKoConfigComments() {
+	ctx := context.Background()
+	coll := mongodb.DB.Collection("config")
+	for _, name := range []string{"ModulesConfig", "RadConfig"} {
+		var doc struct {
+			Value string `bson:"value"`
+		}
+		if err := coll.FindOne(ctx, bson.M{"name": name}).Decode(&doc); err != nil {
+			continue
+		}
+		translated := i18n.TranslateConfigComments(doc.Value)
+		if translated != doc.Value {
+			_, _ = coll.UpdateOne(ctx, bson.M{"name": name}, bson.M{"$set": bson.M{"value": translated}})
+		}
 	}
 }

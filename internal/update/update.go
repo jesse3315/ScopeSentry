@@ -30,6 +30,7 @@ func Update() error {
 	Update20()
 	UpdateKoPluginText()
 	UpdateSensitiveRuleNames()
+	UpdateKoConfigComments()
 
 	configColl := mongodb.DB.Collection("config")
 	var result struct {
