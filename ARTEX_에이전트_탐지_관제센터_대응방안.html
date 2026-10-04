@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARTEX SOC 탐지·대응방안</title>
+<style>
+  :root{
+    --bg:#eef1f4; --surface:#ffffff; --surface-2:#f1f4f8; --border:#dde3ea;
+    --text:#13181f; --muted:#56606e; --accent:#0e7c86; --accent-2:#11a0ab; --accent-soft:#e2f3f4;
+    --crit:#c0392b; --high:#cf6211; --med:#9a7512; --ok:#117a5e; --info:#2563c9;
+    --code-bg:#13202a; --code-text:#e6f0f2;
+    --shadow:0 1px 2px rgba(15,30,40,.06),0 10px 30px rgba(15,30,40,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0a0e12; --surface:#111822; --surface-2:#17202b; --border:#263340;
+      --text:#e6edf2; --muted:#92a0ad; --accent:#39c6cf; --accent-2:#5fd8df; --accent-soft:#102a2d;
+      --crit:#ff6b5e; --high:#ff9d4d; --med:#f0c05a; --ok:#54d6a6; --info:#6fa8ff;
+      --code-bg:#070d12; --code-text:#e6edf2;
+      --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.42);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0a0e12; --surface:#111822; --surface-2:#17202b; --border:#263340;
+    --text:#e6edf2; --muted:#92a0ad; --accent:#39c6cf; --accent-2:#5fd8df; --accent-soft:#102a2d;
+    --crit:#ff6b5e; --high:#ff9d4d; --med:#f0c05a; --ok:#54d6a6; --info:#6fa8ff;
+    --code-bg:#070d12; --code-text:#e6edf2;
+    --shadow:0 1px 2px rgba(0,0,0,.5),0 10px 30px rgba(0,0,0,.42);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);line-height:1.72;font-size:16px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:960px;margin:0 auto;padding:16px;}
+  .theme-toggle{position:sticky;top:12px;float:right;margin:-2px 0 0;z-index:9;
+    background:var(--surface);border:1px solid var(--border);color:var(--text);
+    border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;box-shadow:var(--shadow);}
+
+  header.cover{position:relative;overflow:hidden;border-radius:18px;margin:22px 0 18px;
+    background:linear-gradient(135deg,#0e7c86 0%,#0a5a66 52%,#063b47 100%);color:#fff;
+    padding:44px 36px 38px;box-shadow:var(--shadow);}
+  header.cover::after{content:"";position:absolute;right:-70px;top:-90px;width:300px;height:300px;
+    background:radial-gradient(circle,rgba(255,255,255,.13),transparent 70%);}
+  header.cover::before{content:"🛡";position:absolute;right:30px;bottom:-14px;font-size:120px;opacity:.12;}
+  .doc-tag{font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.85;margin:0 0 13px;font-weight:600;}
+  header.cover h1{font-size:28px;line-height:1.3;margin:0 0 10px;font-weight:800;letter-spacing:-.01em;}
+  header.cover .sub{margin:0;opacity:.92;font-size:14.5px;max-width:64ch;}
+  .meta-row{position:relative;margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.2);border-radius:12px;overflow:hidden;}
+  .meta-row div{background:rgba(6,45,55,.42);padding:11px 14px;}
+  .meta-row .l{font-size:11px;opacity:.8;letter-spacing:.04em;text-transform:uppercase;}
+  .meta-row .d{font-size:14px;font-weight:700;margin-top:3px;}
+
+  section.card{background:var(--surface);border:1px solid var(--border);border-radius:15px;
+    padding:26px 28px;margin:16px 0;box-shadow:var(--shadow);}
+  .lead{border-left:4px solid var(--accent);background:linear-gradient(180deg,var(--accent-soft),transparent);}
+  h2{font-size:21px;font-weight:800;margin:2px 0 16px;display:flex;align-items:center;gap:11px;letter-spacing:-.01em;}
+  h2 .num{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;
+    background:var(--accent);color:#fff;border-radius:9px;font-size:15px;font-weight:800;}
+  h3{font-size:16.5px;font-weight:700;margin:22px 0 10px;}
+  h3 .step{color:var(--accent);font-weight:800;margin-right:4px;}
+  p{margin:10px 0;} a{color:var(--accent);}
+  ul,ol{padding-left:22px;margin:10px 0;} li{margin:6px 0;}
+  code{background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;
+    font-size:13px;font-family:"SFMono-Regular",Consolas,Menlo,monospace;word-break:break-word;}
+  pre{background:var(--code-bg);color:var(--code-text);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-size:12.5px;line-height:1.6;margin:14px 0;font-family:"SFMono-Regular",Consolas,Menlo,monospace;}
+
+  .tbl-scroll{overflow-x:auto;margin:14px 0;border:1px solid var(--border);border-radius:11px;}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:480px;}
+  th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--border);vertical-align:top;}
+  thead th{background:var(--surface-2);font-weight:700;white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  td strong,th strong{font-weight:800;}
+
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11.5px;font-weight:800;white-space:nowrap;}
+  .pill.crit{background:color-mix(in srgb,var(--crit) 16%,transparent);color:var(--crit);}
+  .pill.high{background:color-mix(in srgb,var(--high) 18%,transparent);color:var(--high);}
+  .pill.med{background:color-mix(in srgb,var(--med) 18%,transparent);color:var(--med);}
+  .pill.ok{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok);}
+
+  .feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0 4px;}
+  .feat .f{background:var(--surface-2);border:1px solid var(--border);border-radius:13px;padding:16px 18px;position:relative;}
+  .feat .f .n{position:absolute;top:14px;right:16px;font-size:30px;font-weight:800;color:var(--accent-soft);line-height:1;}
+  .feat .f .t{font-weight:800;font-size:14.5px;margin:0 0 7px;padding-right:30px;}
+  .feat .f .x{font-size:13px;color:var(--muted);margin:0;}
+
+  ul.check{list-style:none;padding-left:4px;}
+  ul.check li{position:relative;padding-left:28px;margin:8px 0;}
+  ul.check li::before{content:"";position:absolute;left:0;top:4px;width:16px;height:16px;border-radius:5px;
+    border:2px solid var(--accent);background:var(--accent-soft);}
+  ul.check li::after{content:"✓";position:absolute;left:3px;top:1px;font-size:12px;font-weight:800;color:var(--accent);}
+
+  blockquote{margin:14px 0;padding:13px 18px;border-left:3px solid var(--accent);background:var(--accent-soft);
+    border-radius:0 10px 10px 0;} blockquote p{margin:4px 0;font-size:14.5px;}
+  .callout{border:1px solid var(--border);border-left:4px solid var(--info);background:var(--surface-2);
+    border-radius:0 11px 11px 0;padding:13px 18px;margin:15px 0;font-size:14px;}
+  .callout.key{border-left-color:var(--accent);}
+  .callout.warn{border-left-color:var(--high);}
+  .callout b{font-weight:800;}
+
+  .oneliner{margin:16px 0 2px;padding:20px 22px;border-radius:14px;color:#fff;
+    background:linear-gradient(120deg,var(--accent) 0%,#0a5a66 100%);box-shadow:var(--shadow);
+    font-size:16.5px;font-weight:700;line-height:1.6;letter-spacing:-.005em;}
+
+  .toc{columns:2;column-gap:30px;}
+  .toc a{display:block;padding:4px 0;text-decoration:none;color:var(--muted);font-size:13.5px;}
+  .toc a:hover{color:var(--accent);}
+  footer{color:var(--muted);font-size:12.5px;text-align:center;padding:26px 12px 42px;line-height:1.7;font-style:italic;}
+  @media(max-width:600px){
+    header.cover{padding:30px 22px;} header.cover h1{font-size:22px;}
+    section.card{padding:20px 18px;} .toc{columns:1;} h2{font-size:19px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <button class="theme-toggle" id="themeBtn" aria-label="테마 전환">◐ 테마</button>
+
+  <header class="cover">
+    <p class="doc-tag">Blue Team · SOC 방어 분석</p>
+    <h1>ARTEX 자율 침투 에이전트<br>관제센터(SOC) 탐지·대응방안</h1>
+    <p class="sub">LLM 기반 자율 침투 에이전트의 <b>행위·트래픽 지문을 관제센터가 어떻게 포착·구별·대응할 것인가</b>에
+    초점을 맞춘 방어용 분석. 공격 재현 명령·익스플로잇 코드는 포함하지 않는다.</p>
+    <div class="meta-row">
+      <div><div class="l">분석 대상</div><div class="d">ARTEX (Go + Next.js, LLM)</div></div>
+      <div><div class="l">관점</div><div class="d">Blue Team / SOC</div></div>
+      <div><div class="l">근거</div><div class="d">LLM 녹화 + 모듈 구조</div></div>
+      <div><div class="l">작성 기준일</div><div class="d">2026-10-04 (KST)</div></div>
+    </div>
+  </header>
+
+  <section class="card lead">
+    <p style="margin:0 0 6px"><b>문서 목적</b> — 대상(DVWA)의 취약점 자체는 의도적 취약 환경이라 방어 가치가 낮다.
+    본 문서는 공격을 수행한 <b>주체 — ARTEX(LLM 기반 자율 침투 테스트 에이전트) — 의 지문</b>을 관제가 어떻게
+    포착·구별·대응할 것인가를 다룬다. 근거는 ① ARTEX DVWA 모의해킹 세션의 LLM 녹화 트레이스, ② ARTEX 본체 아키텍처 분석이다.</p>
+  </section>
+
+  <section class="card">
+    <nav class="toc" aria-label="목차">
+      <a href="#s1">1 · 핵심 결론</a>
+      <a href="#s2">2 · 아키텍처 → 탐지 지문 매핑</a>
+      <a href="#s3">3 · 네트워크·트래픽 지문</a>
+      <a href="#s4">4 · 행위·시간 지문</a>
+      <a href="#s5">5 · 스캐너·사람과의 구별표</a>
+      <a href="#s6">6 · 탐지 규칙 및 SIEM 상관</a>
+      <a href="#s7">7 · 대응 플레이북</a>
+      <a href="#s8">8 · LLM 녹화의 관제적 활용</a>
+      <a href="#s9">9 · 관제 운영 권고 요약</a>
+      <a href="#s10">10 · 결론</a>
+    </nav>
+  </section>
+
+  <!-- 1 -->
+  <section class="card" id="s1">
+    <h2><span class="num">1</span> 핵심 결론 (Executive Summary)</h2>
+    <p>ARTEX는 전통 스캐너(sqlmap·nikto)도, 수동 공격자도 아닌 <b>LLM이 응답을 읽고 다음 수를 결정하는 자율 에이전트</b>다.
+    따라서 "페이로드 시그니처" 중심의 탐지로는 놓치기 쉽고, <b>아키텍처가 강제하는 구조적 지문</b>을 노려야 한다.
+    관제가 잡아야 할 ARTEX의 3대 특징:</p>
+    <div class="feat">
+      <div class="f"><div class="n">1</div><p class="t">단일 기록 프록시(MITM) 집중 egress</p>
+        <p class="x">모든 타깃 트래픽(curl·WebFetch·헤드리스 브라우저·네이티브 HTTP·DNS·enrich)이 하나의 기록 프록시를 거쳐
+        <b>단일 호스트 IP에서 egress</b>. 서로 다른 공격 벡터가 <b>한 출발지에서 동시 관측</b>되는 것이 최대 단서.</p></div>
+      <div class="f"><div class="n">2</div><p class="t">혼재된 클라이언트 정체성</p>
+        <p class="x">같은 IP가 <code>artex-enrich/1.0</code>·Go HTTP·curl·<b>모바일(Pixel 10) 에뮬레이션 헤드리스 Chromium</b>까지
+        상이한 UA·TLS 지문을 <b>한 세션에서 번갈아</b> 낸다.</p></div>
+      <div class="f"><div class="n">3</div><p class="t">LLM 리듬 — 버스트 후 쿨다운</p>
+        <p class="x">추론 지연·레이트리밋·휴먼승인 대기로 <b>짧은 폭주 → 침묵 → 재개</b>의 계단형 리듬.
+        단 <b>수 분 침묵은 무료 티어 한정</b>이고 유료 모델에선 약해짐 — tool-call당 추론 지연(초 단위)은 등급 무관 잔존해 스캐너의 연속 폭주와 구별.</p></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="card" id="s2">
+    <h2><span class="num">2</span> ARTEX 아키텍처 → 관제 탐지 지문 매핑</h2>
+    <p>ARTEX 모듈 구조에서 도출한, <b>코드가 강제하므로 공격자가 쉽게 못 바꾸는</b> 탐지 포인트.</p>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>ARTEX 구성요소</th><th>동작</th><th>관제 탐지 지문</th></tr></thead>
+      <tbody>
+        <tr><td><strong>traffic 기록 프록시</strong></td><td>모든 타깃 트래픽을 MITM 프록시로 라우팅·녹화, 자체 CA로 HTTPS 재서명</td><td><b>단일 egress IP에 다종 벡터 집중</b>; 내부망 가시 시 HTTP_PROXY·사설 루트 CA 신뢰 = 호스트 IOC</td></tr>
+        <tr><td><strong>enrich 엔진</strong></td><td>dnsx 해석 + HTTP 프로브(제목/파비콘/기술스택), 응답 1 MiB 캡, <code>cool</code> 맵 중복 억제</td><td>UA 리터럴 <code>artex-enrich/1.0</code>; 자산별 <b>단발·비중복 프로브</b></td></tr>
+        <tr><td><strong>agent(planner/worker/chat)</strong></td><td>LLM이 WebFetch·Bash로 정찰→익스플로잇, tool-call 단위</td><td><b>적응형 다단계 체인</b>(응답 파싱 후 다음 요청), tool-call 간 <b>모델 지연 갭</b></td></tr>
+        <tr><td><strong>llmpool 페일오버</strong></td><td>429/5xx 시 모델 교체, 백오프 1분→5분→30분, softTrip 누적</td><td><b>다분 침묵 후 재개</b>; 분당 한도 초과 시 일시 정지 — <b>다분 침묵은 무료 티어 한정, 유료 모델엔 약함</b></td></tr>
+        <tr><td><strong>guard + intercept(ask)</strong></td><td>위험 tool-call 차단/휴먼 승인 대기(블로킹)</td><td>승인 대기 중 <b>능동 트래픽 정지</b>(또 다른 리듬 갭)</td></tr>
+        <tr><td><strong>llmrec 레코더</strong></td><td>모든 LLM 요청/응답·토큰 전량 기록</td><td>(공격측 산출물) — 침해 역추적 시 <b>증거·TTP 재구성 소스</b></td></tr>
+        <tr><td><strong>skills: playwright-cli</strong></td><td>헤드리스 Chromium, Pixel 10/iPhone 17 모바일 에뮬레이션</td><td><b>모바일 UA ↔ 데이터센터 IP/TLS 불일치</b>; JS 실행하나 인적 상호작용 부재</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="card" id="s3">
+    <h2><span class="num">3</span> 네트워크·트래픽 지문 <span style="font-size:13px;font-weight:500;color:var(--muted)">(무엇을 볼 것인가)</span></h2>
+
+    <h3><span class="step">3.1</span> 단일 출발지에 다종 벡터 집중 <span class="pill high">최우선 신호</span></h3>
+    <ul>
+      <li>ARTEX는 기록 프록시로 egress를 모으므로, <b>하나의 소스 IP</b>에서 DNS 정찰 → 웹 프로브 → 로그인 → 주입/업로드 → 브라우저 렌더링이 <b>짧은 시간에 순차·혼재</b>되어 관측.</li>
+      <li><b>탐지(의사 규칙)</b>: <code>동일 src_ip AND 세션창(예:10분) 내 서로 다른 공격 범주 ≥ 3종</code> → 자동 에이전트 의심 경보. 스캐너는 벡터가 단조로우나 ARTEX는 "지능형 다벡터".</li>
+    </ul>
+
+    <h3><span class="step">3.2</span> 클라이언트 정체성 모순</h3>
+    <ul>
+      <li><b>UA 리터럴</b>: <code>artex-enrich/1.0</code> 는 enrich 고정 문자열 → <b>WAF/로그 즉시 탐지 룰</b> 가치 최상.</li>
+      <li><b>UA ↔ 네트워크 불일치</b>: <b>모바일 UA인데 데이터센터/VPS 대역</b> = 강한 봇 신호.</li>
+      <li><b>TLS/JA3·JA4 혼재</b>: Go <code>crypto/tls</code>·Chromium·curl 핸드셰이크 지문이 한 IP에서 교차 출현.</li>
+      <li><b>탐지</b>: <code>src_ip 단위 distinct(UA) ≥ 2 AND distinct(JA3) ≥ 2</code> → 오케스트레이션 의심.</li>
+    </ul>
+
+    <h3><span class="step">3.3</span> 자산 정찰 패턴 (enrich)</h3>
+    <ul>
+      <li>파비콘·타이틀·헤더 수집형 <b>단발 GET</b>이 자산마다 1회(중복 억제), 응답 <b>1 MiB에서 절단</b>.</li>
+      <li><b>탐지</b>: <code>artex-enrich/1.0</code> 또는 "자산별 1회 루트/파비콘 프로브 후 중복 없음" 패턴.</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section class="card" id="s4">
+    <h2><span class="num">4</span> 행위·시간 지문 <span style="font-size:13px;font-weight:500;color:var(--muted)">(어떻게 움직이는가)</span></h2>
+
+    <h3><span class="step">4.1</span> LLM 리듬 — 버스트/쿨다운 계단형</h3>
+    <ul>
+      <li>tool-call마다 <b>모델 추론 지연(수 초)</b> 삽입 → 연속 폭주가 아닌 <b>작은 버스트 + 규칙적 갭</b>.</li>
+      <li>429/5xx 시 백오프(<b>1분 → 5분 → 30분</b>) → <b>수 분 침묵 후 재개</b>. 무료 티어 <b>분당 20요청</b> 초과 시 엔진 정지 후 재가동(본 세션 실측). <b>단 수 분 침묵은 무료 티어 특성으로 유료 모델에선 거의 사라짐</b> — tool-call당 추론 지연(초 단위)은 등급 무관 잔존.</li>
+      <li><b>탐지(시간분포)</b>: 요청 간격 <b>저엔트로피 + 수 분 주기 침묵/재개</b> 반복 = 자동 에이전트. 사람은 불규칙, 스캐너는 고밀도 연속 — ARTEX는 <b>중밀도·간헐·정시 재개</b>로 구별.</li>
+    </ul>
+
+    <h3><span class="step">4.2</span> 적응형 다단계 체인 (의미 의존 요청열)</h3>
+    <ul>
+      <li>LLM이 <b>직전 응답을 읽고 다음 요청을 구성</b>: 정보 노출 → 그 값을 쓴 후속 요청, 인증 정보 획득 → <b>곧바로 정상 자격증명으로 로그인</b>(스캐너 불가 자율 체인).</li>
+      <li><b>탐지(상관)</b>: <code>대용량/민감 응답 → 동일 IP의 논리적 후속(인증 성공·권한 상승) within 초~분</code> 상관룰.</li>
+    </ul>
+
+    <h3><span class="step">4.3</span> 저소음·고정밀</h3>
+    <ul>
+      <li>sqlmap류 수천 요청 무차별과 달리 <b>소수의 잘 구성된 요청</b>으로 목적 달성(토큰·요청 효율 지향).</li>
+      <li><b>탐지</b>: "요청 수는 적으나 <b>성공률/민감 엔드포인트 적중률이 비정상적으로 높은</b>" 세션.</li>
+    </ul>
+
+    <h3><span class="step">4.4</span> 휴먼-인-더-루프 승인 갭</h3>
+    <ul><li>guard/intercept의 <code>ask</code> 승인 대기 시 능동 요청이 <b>블로킹(정지)</b> → 또 다른 비인적 정지 구간.</li></ul>
+  </section>
+
+  <!-- 5 -->
+  <section class="card" id="s5">
+    <h2><span class="num">5</span> 전통 스캐너·사람 공격자와의 구별표</h2>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>축</th><th>전통 스캐너</th><th>사람 공격자</th><th>ARTEX (LLM 에이전트)</th></tr></thead>
+      <tbody>
+        <tr><td class="k">요청 밀도</td><td>매우 높음(연속 폭주)</td><td>낮음·불규칙</td><td><b>중밀도 버스트 + 규칙적 갭</b></td></tr>
+        <tr><td class="k">시간 리듬</td><td>균일 고속</td><td>비정형</td><td><b>모델지연/백오프 계단형, 정시 재개</b></td></tr>
+        <tr><td class="k">UA/TLS</td><td>단일·고정</td><td>브라우저 1종</td><td><b>다종 혼재(enrich·Go·curl·모바일)</b></td></tr>
+        <tr><td class="k">egress</td><td>다양할 수 있음</td><td>단일/프록시</td><td><b>단일 기록프록시 IP 집중</b></td></tr>
+        <tr><td class="k">벡터 다양성</td><td>도구 특화(단조)</td><td>선택적</td><td><b>다벡터 자율 전환</b></td></tr>
+        <tr><td class="k">적응성</td><td>규칙 기반 고정</td><td>높음</td><td><b>응답 파싱 기반 자율 적응</b></td></tr>
+        <tr><td class="k">소음</td><td>큼</td><td>작음</td><td><b>작음·고정밀</b></td></tr>
+        <tr><td class="k">고유 리터럴</td><td>툴 시그니처</td><td>없음</td><td><code>artex-enrich/1.0</code></td></tr>
+      </tbody>
+    </table></div>
+    <blockquote><p><b>핵심</b> — ARTEX는 "사람처럼 적응하되 기계처럼 규칙적으로 멈춘다". 이 <b>적응성과 기계적 리듬의 공존</b>이
+    다른 어떤 주체와도 다른 ARTEX만의 지문이며, 단일 지표보다 <b>6장의 다지표 상관</b>으로 판정한다.</p></blockquote>
+  </section>
+
+  <!-- 6 -->
+  <section class="card" id="s6">
+    <h2><span class="num">6</span> 탐지 규칙 및 SIEM 상관 전략</h2>
+
+    <h3><span class="step">6.1</span> 단일 지표 룰 (1차 알림)</h3>
+    <ul class="check">
+      <li>UA == <code>artex-enrich/1.0</code> (미래 변형 대비 <code>artex-*</code> 정규식)</li>
+      <li>모바일 UA ↔ 데이터센터/VPS ASN 불일치</li>
+      <li>동일 IP에서 distinct(UA) ≥ 2 <b>AND</b> distinct(JA3/JA4) ≥ 2 (세션창 내)</li>
+    </ul>
+
+    <h3><span class="step">6.2</span> 다지표 상관 룰 (고신뢰 — AI 에이전트 판정)</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>상관 시나리오</th><th>결합 신호</th><th>등급</th></tr></thead>
+      <tbody>
+        <tr><td>단일 IP·세션창 내 정찰+인증+주입+업로드 등 <b>벡터 ≥ 3종</b></td><td>접근로그 + WAF 카테고리</td><td><span class="pill high">High</span></td></tr>
+        <tr><td>민감/대용량 응답 → 동일 IP <b>논리적 후속(인증성공·권한상승)</b></td><td>접근로그 + 인증 + UEBA</td><td><span class="pill crit">Critical</span></td></tr>
+        <tr><td>요청 간격 <b>저엔트로피 + 수분 주기 침묵/재개</b> 반복</td><td>접근로그 타임시리즈 분석</td><td><span class="pill high">High</span></td></tr>
+        <tr><td>소수 요청인데 <b>민감 엔드포인트 적중률 이상치</b></td><td>접근로그 + 자산 민감도 태깅</td><td><span class="pill high">High</span></td></tr>
+        <tr><td>(내부망 가시 시) 호스트에 <b>HTTP_PROXY·사설 루트 CA 신뢰</b> 설정</td><td>EDR/호스트 설정</td><td><span class="pill high">High</span></td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="step">6.3</span> 필수 로그 소스</h3>
+    <ul class="check">
+      <li>웹 접근/오류 로그(전체 UA·쿼리·응답코드·응답시간·바이트) · WAF 카테고리 이벤트</li>
+      <li>TLS 핸드셰이크 지문(JA3/JA4) 수집</li>
+      <li>인증 로그(성공/실패·세션 발급) · UEBA(정상계정 이상행위)</li>
+      <li>NetFlow/egress ASN·지역 태깅(모바일UA↔DC 불일치 판정용)</li>
+      <li>(관할 시) ARTEX 운영 호스트 EDR — 프록시/CA/LLM 아웃바운드</li>
+    </ul>
+  </section>
+
+  <!-- 7 -->
+  <section class="card" id="s7">
+    <h2><span class="num">7</span> 대응 플레이북 (AI 에이전트 공격)</h2>
+    <h3><span class="step">7.1</span> 능동 완화 — "리듬을 깨라"</h3>
+    <ol>
+      <li><b>레이트 리밋/속도 제한</b>은 공격 비용·시간을 올리는 <b>심층 방어의 한 겹</b>. 단, 본 세션의 정지는 <b>무료 티어 분당 20회 한도(429)</b>에 따른 <b>테스트 환경 산물</b>이며 <b>유료·전용 모델에선 완화·소멸해 엔진이 멈추지 않는다</b> — <b>결정적 차단책이 아니다.</b> 적응형 체인 탐지·인증 강화와 함께 보조로 운용.</li>
+      <li><b>단일 egress IP 차단/챌린지</b> — 집중 egress 특성상 IP 레벨 대응의 비용 대비 효과가 크다.</li>
+      <li><b>봇 챌린지(PoW/JS/행위)</b> — 헤드리스 Chromium은 통과하나, Go/curl 경로와 모바일UA 모순이 챌린지 단계에서 추가 노출된다.</li>
+    </ol>
+    <h3><span class="step">7.2</span> 침해 대응 (체인 완성 정황 시)</h3>
+    <ul>
+      <li>적응형 체인(민감응답→인증성공) 확인 시 <b>자격증명 유출 가정</b>: 영향 계정 전수 재설정·세션 만료.</li>
+      <li>RCE/업로드 정황은 서버측(프로세스 계보·FIM·아웃바운드) 교차 확인 후 호스트 격리.</li>
+      <li>증거 보존: 공격 IP·UA 집합·JA3 지문·요청 타임라인(버스트/갭)·업로드 산출물 해시.</li>
+    </ul>
+    <h3><span class="step">7.3</span> 역추적·귀속</h3>
+    <ul>
+      <li><b>UA/JA3 집합과 리듬 지문</b>을 IOC화하여 재출현 탐지. <code>artex-*</code> UA·모바일↔DC 불일치는 동일 도구 재사용 식별에 유효.</li>
+      <li>ARTEX의 <b>llmrec(LLM 전량 녹화)</b>는 공격측 산출물이나, 침해가 운영 주체와 연계될 경우 <b>tool-call 타임라인·프롬프트·토큰 기록</b>이 TTP 재구성·귀속의 1차 증거가 된다.</li>
+    </ul>
+  </section>
+
+  <!-- 8 -->
+  <section class="card" id="s8">
+    <h2><span class="num">8</span> LLM 녹화 자료의 관제적 활용</h2>
+    <p>ARTEX의 녹화(세션 트레이스·llmrec)는 공격자 측 기록이지만, 관제가 동일 패턴 재탐지를 위해 <b>행위 모델(TTP 템플릿)</b>로 역이용할 수 있다.</p>
+    <ul>
+      <li><b>TTP 템플릿화</b>: 단계열(정찰→로그인폼/토큰 인지→모듈 순회→주입/업로드→사후활용)을 상관룰 시나리오 템플릿으로 전환(6.2 참조).</li>
+      <li><b>리듬 베이스라인</b>: tool-call 간격·백오프 구간을 "자동 에이전트 시간 서명"으로 학습시켜 타임시리즈 이상탐지 레이블로 활용.</li>
+      <li><b>지문 사전 구축</b>: enrich UA·Go/curl/모바일Chromium의 UA·JA3 조합을 <b>ARTEX 지문 사전</b>으로 유지·대조.</li>
+    </ul>
+  </section>
+
+  <!-- 9 -->
+  <section class="card" id="s9">
+    <h2><span class="num">9</span> 관제 운영 권고 요약</h2>
+    <ol>
+      <li><b>주체를 탐지하라</b> — 취약점이 아니라 ARTEX의 <i>구조적 지문</i>(단일 프록시 egress·혼재 UA/TLS·LLM 리듬)을 노린다.</li>
+      <li><b><code>artex-enrich/1.0</code> 즉시 룰화</b> — 고정 리터럴은 비용 0의 고가치 시그니처.</li>
+      <li><b>"모바일 UA ↔ 데이터센터 IP"</b> 불일치를 상시 플래그.</li>
+      <li><b>시간분포를 본다</b> — 저엔트로피 간격 + 수분 주기 침묵/재개 = 자동 에이전트 서명.</li>
+      <li><b>적응형 체인을 상관으로 잡는다</b> — 민감응답→논리적 후속(인증성공)은 Critical.</li>
+      <li><b>레이트 리밋은 보조 수단</b> — 공격 비용·시간은 올리나 유료 모델 공격자는 멈추지 않는다(무료 티어 한정 효과). 결정타로 삼지 말 것.</li>
+      <li><b>다지표 합산 판정</b> — 단일 UA/IP가 아니라 복수 지표 상관으로 오탐을 줄인다.</li>
+    </ol>
+  </section>
+
+  <!-- 10 -->
+  <section class="card" id="s10" style="border-color:color-mix(in srgb,var(--accent) 40%,var(--border));">
+    <h2><span class="num">10</span> 결론</h2>
+
+    <h3><span class="step">10.1</span> 패러다임 전환 — "무엇을 쐈는가"에서 "누가 쏘는가"로</h3>
+    <p>ARTEX 분석이 관제에 주는 핵심 교훈은, <b>방어의 무게중심을 페이로드(취약점·공격 문자열)에서 공격 주체(자율 에이전트)의
+    구조적 지문으로 옮겨야 한다</b>는 것이다. LLM이 응답을 읽고 다음 수를 스스로 결정하는 이상, 페이로드는 매번 새로 조립되고
+    시그니처는 쉽게 빗나간다. 반면 에이전트의 <b>아키텍처가 강제하는 행위·트래픽 지문</b>은 공격자가 도구를 재설계하지 않는 한 남는다.
+    즉, ARTEX 대응은 하나의 룰이 아니라 <b>탐지 철학의 교체</b>다.</p>
+
+    <h3><span class="step">10.2</span> 지표의 내구성 위계 — 어디에 베팅할 것인가</h3>
+    <p>모든 지표가 같은 가치를 갖지 않는다. <b>회피 비용(공격자가 바꾸기 얼마나 쉬운가)</b> 기준으로 세 층위로 나누어 자원 배분 우선순위를 정한다.</p>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>층위</th><th>지표</th><th>회피 난이도</th><th>관제 활용</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill med">취약</span></td><td><code>artex-enrich/1.0</code> UA 리터럴, 고정 문자열</td><td>낮음</td><td><b>비용 0 조기경보 트립와이어</b> — 걸리면 횡재, 안 걸려도 손해 없음</td></tr>
+        <tr><td><span class="pill high">중간</span></td><td>단일 egress IP 집중, UA/JA3 혼재, 모바일UA↔DC 불일치</td><td>중간</td><td>프록시 분산·UA 랜덤화로 흐려질 수 있어 <b>단독 판정 금지, 상관의 재료</b></td></tr>
+        <tr><td><span class="pill crit">견고</span></td><td>LLM 추론 지연 리듬, 적응형 다단계 체인(의미 의존), 휴먼승인 정지 갭</td><td>높음</td><td><b>고신뢰 판정의 앵커</b> — LLM을 쓰는 한 추론 지연·응답 적응은 사라지지 않는다</td></tr>
+      </tbody>
+    </table></div>
+    <blockquote><p><b>결론적 베팅</b> — 취약 지표는 <i>공짜 알림</i>으로 깔아두되, <b>최종 판정은 견고 지표(특히 "민감 응답 → 논리적 후속"의
+    의미 상관)에 건다.</b> 적응형 체인은 ARTEX가 LLM 에이전트인 한 구조적으로 남는, 가장 모방하기 어려운 서명이다.</p></blockquote>
+
+    <h3><span class="step">10.3</span> 단계별 실행 로드맵</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>단계</th><th>기간/비용</th><th>실행 항목</th><th>기대 효과</th></tr></thead>
+      <tbody>
+        <tr><td><b>1. 즉시</b></td><td>당일·비용 0</td><td><code>artex-*</code> UA 룰화, 모바일UA↔DC 불일치 플래그, <b>레이트 리밋(보조)</b></td><td>조기경보 + 공격 비용·시간 상승(유료 모델엔 제한적)</td></tr>
+        <tr><td><b>2. 단기</b></td><td>수주</td><td>JA3/JA4 수집, "단일 IP·세션창 내 벡터 ≥ 3종" 상관룰, 시간분포 탐지</td><td>다지표 1차 판정 체계 확립</td></tr>
+        <tr><td><b>3. 중기</b></td><td>분기</td><td>UEBA "민감응답→인증성공" 상관, 리듬 시계열 이상탐지, <b>ARTEX 지문 사전·TTP 템플릿</b></td><td>견고 지표 기반 고신뢰 자동판정</td></tr>
+        <tr><td><b>4. 상시</b></td><td>거버넌스</td><td>"AI 에이전트 탐지"를 상시 관제 범주로 편입, 지문 사전 지속 갱신</td><td>신종·변종 자율 에이전트 대응 지속성</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="step">10.4</span> 한계와 잔존 리스크 (정직한 경계)</h3>
+    <p>본 방안은 <b>확정 차단이 아니라 탐지 확률의 제고</b>다. 역량 있는 공격자는 다음으로 지문을 흐릴 수 있다.</p>
+    <ul>
+      <li><b>egress 분산</b>(다중 IP·주거용 프록시) → "단일 IP 집중" 신호 약화</li>
+      <li><b>UA/TLS 랜덤화 및 인적 지터 주입</b> → 혼재·저엔트로피 신호 희석</li>
+      <li><b>헤드리스 브라우저 위장 강화</b> → 봇 챌린지 일부 우회</li>
+    </ul>
+    <div class="callout warn">따라서 ① <b>단일 지표 과신 금지</b>(다지표 상관으로만 판정), ② <b>심층 방어</b>(레이트 리밋·인증 강화·자격증명 위생은
+    에이전트 종류와 무관하게 유효), ③ <b>견고 지표 우선</b>이 원칙이다. 분산·랜덤화에도 <b>LLM 추론 지연과 응답 의존적 적응 체인</b>은
+    구조적으로 남으므로, 여기에 탐지 역량을 집중하는 것이 가장 비용 효율적이다.</div>
+
+    <h3><span class="step">10.5</span> 전망 — 선행 사례로서의 ARTEX</h3>
+    <p>ARTEX는 자율 공격 에이전트가 <b>"사람처럼 적응하되 기계처럼 규칙적으로 멈추는"</b> 새로운 위협 범주의 선행 사례다.
+    이런 에이전트가 보편화될수록, 관제센터는 개별 취약점 대응을 넘어 <b>"자율 에이전트 식별"을 상시 운영 역량으로 내재화</b>해야 한다.
+    본 문서의 지문 사전·TTP 템플릿·리듬 베이스라인은 ARTEX 한 종에 국한되지 않고, <b>동류 LLM 공격 에이전트 전반으로 확장 가능한 탐지 자산</b>으로 설계되었다.</p>
+
+    <h3><span class="step">10.6</span> 한 문장 요약</h3>
+    <div class="oneliner">취약점이 아니라 에이전트를 탐지하라. 바꾸기 쉬운 시그니처는 공짜 알림으로 깔고,
+    바꾸기 어려운 <b style="color:#fff">응답 의존적 적응 체인(의미 상관)에 판정을 걸고</b>, 다지표 상관과 인증 강화·자격증명 위생으로 겹겹이 막아라.</div>
+  </section>
+
+  <footer>
+    본 문서는 ARTEX LLM 세션 녹화 트레이스와 ARTEX 본체 아키텍처 분석을 근거로, 자율 침투 에이전트의 행위·트래픽 지문을<br>
+    관제센터가 포착·구별·대응하기 위한 방어용 분석이다. 공격 재현 명령·익스플로잇 코드는 의도적으로 제외하였으며,<br>
+    대상 DVWA는 보안 교육·검증 전용 환경이다.
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var btn=document.getElementById('themeBtn'),root=document.documentElement;
+    function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+    try{var s=localStorage.getItem('artex-soc-theme');if(s)root.setAttribute('data-theme',s);}catch(e){}
+    function cur(){return root.getAttribute('data-theme')||(sysDark()?'dark':'light');}
+    btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';
+      root.setAttribute('data-theme',n);try{localStorage.setItem('artex-soc-theme',n);}catch(e){}});
+  })();
+</script>
+</body>
+</html>
