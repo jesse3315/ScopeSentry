@@ -26,7 +26,7 @@ const docTemplate = `{
     "paths": {
         "/api/assets": {
             "post": {
-                "description": "创建新的资产",
+                "description": "새 자산 생성",
                 "consumes": [
                     "application/json"
                 ],
@@ -34,12 +34,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "创建资产",
+                "summary": "자산 생성",
                 "parameters": [
                     {
-                        "description": "资产信息",
+                        "description": "자산 정보",
                         "name": "asset",
                         "in": "body",
                         "required": true,
@@ -84,7 +84,7 @@ const docTemplate = `{
         },
         "/api/assets/asset": {
             "post": {
-                "description": "获取资产列表，支持分页、排序和过滤",
+                "description": "자산 목록 조회 (페이지네이션, 정렬, 필터링 지원)",
                 "consumes": [
                     "application/json"
                 ],
@@ -92,12 +92,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "获取资产列表",
+                "summary": "자산 목록 조회",
                 "parameters": [
                     {
-                        "description": "查询参数",
+                        "description": "조회 파라미터",
                         "name": "query",
                         "in": "body",
                         "required": true,
@@ -150,7 +150,7 @@ const docTemplate = `{
         },
         "/api/assets/deduplicate/{assetType}": {
             "post": {
-                "description": "对指定类型的资产进行去重处理",
+                "description": "지정한 유형의 자산에 대해 중복 제거 수행",
                 "consumes": [
                     "application/json"
                 ],
@@ -158,19 +158,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "资产去重",
+                "summary": "자산 중복 제거",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "资产类型",
+                        "description": "자산 유형",
                         "name": "assetType",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "过滤条件",
+                        "description": "필터 조건",
                         "name": "filter",
                         "in": "body",
                         "required": true,
@@ -180,7 +180,7 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "description": "分组字段",
+                        "description": "그룹화 필드",
                         "name": "groupFields",
                         "in": "body",
                         "required": true,
@@ -216,7 +216,7 @@ const docTemplate = `{
         },
         "/api/assets/{id}": {
             "get": {
-                "description": "根据ID获取单个资产的详细信息",
+                "description": "ID로 단일 자산의 상세 정보 조회",
                 "consumes": [
                     "application/json"
                 ],
@@ -224,13 +224,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "获取单个资产",
+                "summary": "단일 자산 조회",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "资产ID",
+                        "description": "자산 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -276,7 +276,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "更新指定ID的资产信息",
+                "description": "지정한 ID의 자산 정보 수정",
                 "consumes": [
                     "application/json"
                 ],
@@ -284,19 +284,19 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "更新资产",
+                "summary": "자산 수정",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "资产ID",
+                        "description": "자산 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "资产信息",
+                        "description": "자산 정보",
                         "name": "asset",
                         "in": "body",
                         "required": true,
@@ -345,7 +345,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "删除指定ID的资产",
+                "description": "지정한 ID의 자산 삭제",
                 "consumes": [
                     "application/json"
                 ],
@@ -353,13 +353,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "删除资产",
+                "summary": "자산 삭제",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "资产ID",
+                        "description": "자산 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -395,7 +395,7 @@ const docTemplate = `{
         },
         "/api/assets/{id}/changelog": {
             "get": {
-                "description": "获取指定ID资产的变更历史记录",
+                "description": "지정한 ID 자산의 변경 이력 조회",
                 "consumes": [
                     "application/json"
                 ],
@@ -403,13 +403,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "获取资产变更日志",
+                "summary": "자산 변경 로그 조회",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "资产ID",
+                        "description": "자산 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -460,7 +460,7 @@ const docTemplate = `{
         },
         "/api/assets/{id}/screenshot": {
             "get": {
-                "description": "获取指定ID资产的截图",
+                "description": "지정한 ID 자산의 스크린샷 조회",
                 "consumes": [
                     "application/json"
                 ],
@@ -468,13 +468,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "资产"
+                    "자산"
                 ],
-                "summary": "获取资产截图",
+                "summary": "자산 스크린샷 조회",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "资产ID",
+                        "description": "자산 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -527,7 +527,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取所有在线节点的数据",
+                "description": "모든 온라인 노드의 데이터 조회",
                 "consumes": [
                     "application/json"
                 ],
@@ -581,7 +581,7 @@ const docTemplate = `{
         },
         "/page-monitoring/content": {
             "post": {
-                "description": "获取页面监控内容接口",
+                "description": "페이지 모니터링 콘텐츠 조회 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -593,7 +593,7 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "description": "内容请求",
+                        "description": "콘텐츠 요청",
                         "name": "contentRequest",
                         "in": "body",
                         "required": true,
@@ -644,7 +644,7 @@ const docTemplate = `{
         },
         "/page-monitoring/diff": {
             "post": {
-                "description": "获取页面监控差异接口",
+                "description": "페이지 모니터링 차이 조회 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -656,7 +656,7 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "description": "差异请求",
+                        "description": "차이 비교 요청",
                         "name": "diffRequest",
                         "in": "body",
                         "required": true,
@@ -712,7 +712,7 @@ const docTemplate = `{
         },
         "/page-monitoring/history": {
             "post": {
-                "description": "获取页面监控历史记录接口",
+                "description": "페이지 모니터링 이력 조회 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -724,7 +724,7 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "description": "历史记录请求",
+                        "description": "이력 요청",
                         "name": "historyRequest",
                         "in": "body",
                         "required": true,
@@ -778,7 +778,7 @@ const docTemplate = `{
         },
         "/query": {
             "post": {
-                "description": "支持name字段模糊搜索与分页",
+                "description": "name 필드 퍼지 검색 및 페이지네이션 지원",
                 "consumes": [
                     "application/json"
                 ],
@@ -788,10 +788,10 @@ const docTemplate = `{
                 "tags": [
                     "task"
                 ],
-                "summary": "获取任务列表",
+                "summary": "작업 목록 조회",
                 "parameters": [
                     {
-                        "description": "查询参数",
+                        "description": "조회 파라미터",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -847,7 +847,7 @@ const docTemplate = `{
         },
         "/system/version": {
             "get": {
-                "description": "获取 ScopeSentry 服务端及所有节点的当前版本信息",
+                "description": "ScopeSentry 서버 및 모든 노드의 현재 버전 정보 조회",
                 "consumes": [
                     "application/json"
                 ],
@@ -910,7 +910,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取用户列表接口",
+                "description": "사용자 목록 조회 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -924,14 +924,14 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "default": 1,
-                        "description": "页码",
+                        "description": "페이지 번호",
                         "name": "page",
                         "in": "query"
                     },
                     {
                         "type": "integer",
                         "default": 10,
-                        "description": "每页数量",
+                        "description": "페이지당 개수",
                         "name": "size",
                         "in": "query"
                     }
@@ -975,7 +975,7 @@ const docTemplate = `{
         },
         "/users/login": {
             "post": {
-                "description": "用户登录接口",
+                "description": "사용자 로그인 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -985,10 +985,10 @@ const docTemplate = `{
                 "tags": [
                     "user"
                 ],
-                "summary": "用户登录",
+                "summary": "사용자 로그인",
                 "parameters": [
                     {
-                        "description": "登录信息",
+                        "description": "로그인 정보",
                         "name": "loginRequest",
                         "in": "body",
                         "required": true,
@@ -1044,7 +1044,7 @@ const docTemplate = `{
         },
         "/users/register": {
             "post": {
-                "description": "用户注册接口",
+                "description": "사용자 등록 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -1056,7 +1056,7 @@ const docTemplate = `{
                 ],
                 "parameters": [
                     {
-                        "description": "注册信息",
+                        "description": "등록 정보",
                         "name": "registerRequest",
                         "in": "body",
                         "required": true,
@@ -1118,7 +1118,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "获取单个用户接口",
+                "description": "단일 사용자 조회 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -1131,7 +1131,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
+                        "description": "사용자 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1182,7 +1182,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "更新用户接口",
+                "description": "사용자 수정 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -1195,13 +1195,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
+                        "description": "사용자 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "更新信息",
+                        "description": "수정 정보",
                         "name": "updateRequest",
                         "in": "body",
                         "required": true,
@@ -1261,7 +1261,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "删除用户接口",
+                "description": "사용자 삭제 API",
                 "consumes": [
                     "application/json"
                 ],
@@ -1274,7 +1274,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
+                        "description": "사용자 ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1314,14 +1314,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "请求错误状态码",
+                    "description": "잘못된 요청 상태 코드",
                     "type": "integer",
                     "example": 400
                 },
                 "message": {
-                    "description": "错误消息",
+                    "description": "오류 메시지",
                     "type": "string",
-                    "example": "请求错误"
+                    "example": "잘못된 요청"
                 }
             }
         },
@@ -1329,14 +1329,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "服务器错误状态码",
+                    "description": "서버 오류 상태 코드",
                     "type": "integer",
                     "example": 500
                 },
                 "message": {
-                    "description": "错误消息",
+                    "description": "오류 메시지",
                     "type": "string",
-                    "example": "服务器内部错误"
+                    "example": "서버 내부 오류"
                 }
             }
         },
@@ -1344,14 +1344,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "未找到状态码",
+                    "description": "찾을 수 없음 상태 코드",
                     "type": "integer",
                     "example": 404
                 },
                 "message": {
-                    "description": "错误消息",
+                    "description": "오류 메시지",
                     "type": "string",
-                    "example": "资源未找到"
+                    "example": "리소스를 찾을 수 없음"
                 }
             }
         },
@@ -1359,17 +1359,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "成功状态码",
+                    "description": "성공 상태 코드",
                     "type": "integer",
                     "example": 200
                 },
                 "data": {
-                    "description": "响应数据"
+                    "description": "응답 데이터"
                 },
                 "message": {
-                    "description": "成功消息",
+                    "description": "성공 메시지",
                     "type": "string",
-                    "example": "操作成功"
+                    "example": "작업 성공"
                 }
             }
         },
@@ -1377,14 +1377,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "description": "未授权状态码",
+                    "description": "인증되지 않음 상태 코드",
                     "type": "integer",
                     "example": 401
                 },
                 "message": {
-                    "description": "错误消息",
+                    "description": "오류 메시지",
                     "type": "string",
-                    "example": "未授权访问"
+                    "example": "인증되지 않은 접근"
                 }
             }
         },
@@ -1581,7 +1581,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "flag": {
-                    "description": "1: 获取上一次响应, 2: 获取当前响应",
+                    "description": "1: 이전 응답 조회, 2: 현재 응답 조회",
                     "type": "string"
                 },
                 "id": {
@@ -1609,7 +1609,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "filters": {
-                    "description": "Filter 过滤条件",
+                    "description": "Filter 필터 조건",
                     "type": "object",
                     "additionalProperties": {
                         "type": "array",
@@ -1625,11 +1625,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "search": {
-                    "description": "SearchExpression 搜索表达式，如 \"url=example.com \u0026\u0026 statuscode=200\"",
+                    "description": "SearchExpression 검색 표현식, 예를 들어 \"url=example.com \u0026\u0026 statuscode=200\"",
                     "type": "string"
                 },
                 "searchType": {
-                    "description": "SearchType 搜索类型，对应SearchKey中的key",
+                    "description": "SearchType 검색 유형, SearchKey의 key에 대응",
                     "type": "string"
                 },
                 "sort": {
@@ -1781,7 +1781,7 @@ const docTemplate = `{
             }
         },
         "internal_api_handlers_system.VersionListResponse": {
-            "description": "版本信息列表",
+            "description": "버전 정보 목록",
             "type": "object",
             "properties": {
                 "list": {
@@ -1869,7 +1869,7 @@ const docTemplate = `{
                 },
                 "search": {
                     "type": "string",
-                    "example": "测试"
+                    "example": "테스트"
                 }
             }
         }
@@ -1891,7 +1891,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "ScopeSentry API",
-	Description:      "ScopeSentry 是一个安全扫描和资产管理平台",
+	Description:      "ScopeSentry는 보안 스캔 및 자산 관리 플랫폼입니다",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
