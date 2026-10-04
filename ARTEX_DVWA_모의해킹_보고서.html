@@ -57,6 +57,48 @@
   .cover-ov code{background:#f2f2f6;border:1px solid #e0e0e8;color:#222;}
   .cover-ov .ok{color:#1a8a4a;font-weight:800;}
   .cover-foot{margin-top:auto;padding-top:22px;font-size:12px;color:#888;letter-spacing:.02em;}
+
+  /* 두 번째 흰 A4 시트 — 핵심 요약 + 목차 + 콘솔 구성 + 시각화 */
+  section.sheet{position:relative;overflow:hidden;border-radius:14px;margin:18px 0;
+    background:#ffffff;color:#111;border:1px solid #d9d9e0;
+    aspect-ratio:210/297;display:flex;flex-direction:column;
+    padding:44px 50px 38px;box-shadow:var(--shadow);}
+  section.sheet h2{color:#111;}
+  section.sheet h2 .num{background:#1a1569;color:#fff;}
+  section.sheet h2 .num.dot{background:#4b3bd4;}
+  section.sheet p{color:#333;}
+  section.sheet strong{color:#1a1569;}
+  section.sheet code{background:#f2f2f6;border:1px solid #e0e0e8;color:#222;}
+  section.sheet .toc a{color:#555;}
+  section.sheet .toc a:hover{color:#4b3bd4;}
+  .sheet-div{height:1px;background:#e4e4ec;margin:20px 0;}
+
+  /* 아키텍처 시각화 */
+  .arch{margin:16px 0 4px;border:1px solid #e0e0e8;border-radius:13px;background:#fafaff;padding:18px 18px 20px;}
+  .arch-h{font-size:12px;font-weight:800;letter-spacing:.04em;color:#4b3bd4;text-transform:uppercase;margin:0 0 12px;
+    display:flex;align-items:center;gap:8px;}
+  .arch-h::before{content:"▣";font-size:13px;}
+  .caps{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px;padding:12px;border:1px dashed #cfcfe0;border-radius:10px;
+    background:#fff;}
+  .caps .cap{font-size:12px;font-weight:700;color:#2a2487;background:#eceaff;border:1px solid #d8d4fb;
+    border-radius:999px;padding:4px 11px;}
+  .caps .cap.hub{background:#1a1569;color:#fff;border-color:#1a1569;}
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
+  .flow .fnode{flex:1 1 150px;min-width:150px;background:#fff;border:1.5px solid #d6d6e4;border-radius:11px;
+    padding:13px 14px;text-align:center;}
+  .flow .fnode .fi{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;
+    background:#4b3bd4;color:#fff;font-size:12px;font-weight:800;margin-bottom:7px;}
+  .flow .fnode b{display:block;font-size:14px;color:#1a1569;margin-bottom:3px;}
+  .flow .fnode span{display:block;font-size:12px;color:#555;line-height:1.5;}
+  .flow .fnode.reg{border-color:#1a8a4a;background:#f1fbf4;}
+  .flow .fnode.reg .fi{background:#1a8a4a;} .flow .fnode.reg b{color:#157a40;}
+  .flow .farrow{display:flex;align-items:center;justify-content:center;flex:0 0 42px;color:#9a97c4;font-size:22px;font-weight:800;}
+  .flow .flabel{display:block;font-size:10.5px;color:#9a97c4;font-weight:700;margin-top:2px;letter-spacing:.02em;}
+  .arch-cap{font-size:12px;color:#777;margin:14px 0 0;line-height:1.6;}
+  @media(max-width:600px){
+    .flow .farrow{flex-basis:100%;transform:rotate(90deg);height:26px;}
+    section.sheet{padding:30px 22px;}
+  }
   .meta-row{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;
     background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.2);border-radius:12px;overflow:hidden;}
   .meta-row div{background:rgba(32,24,96,.35);padding:11px 14px;}
@@ -171,17 +213,15 @@
   </header>
 
   <!-- 핵심 요약 -->
-  <section class="card lead">
-    <h2><span class="num">●</span> 핵심 요약</h2>
+  <!-- 핵심 요약 + 목차 + 2 (A4 시트) -->
+  <section class="sheet" id="s2">
+    <h2><span class="num dot">●</span> 핵심 요약</h2>
     <p>ARTEX는 <strong>단일 대화 지시만으로</strong> 침투 테스트 작업을 자율 생성·실행·추적하고,
     <strong>라이브 재검증</strong>을 거쳐 발견을 플랫폼에 <strong>정식 등록(report_finding 15건)</strong>하기까지
     전 파이프라인을 <strong>엔드투엔드로 완주</strong>했습니다. 이번 수행은 <strong>GLM 5.3 Flash</strong>로 진행하였고,
     무료 사용량을 소진한 뒤 유료로 이어서 재시작하여 완료되었습니다.</p>
-  </section>
 
-  <!-- 목차 + 2 -->
-  <section class="card" id="s2">
-    <nav class="toc" aria-label="목차">
+    <nav class="toc" aria-label="목차" style="margin-top:8px">
       <a href="#s1">1 · 개요</a>
       <a href="#s2">2 · ARTEX 콘솔/플랫폼</a>
       <a href="#s3">3 · 수행 과정 — ARTEX 대화 중심</a>
@@ -190,10 +230,32 @@
       <a href="#s6">6 · DVWA 1.10 알려진 취약점 vs ARTEX 탐지</a>
       <a href="#s7">7 · 결론 (+ 방어 관점)</a>
     </nav>
-    <h2 style="margin-top:22px"><span class="num">2</span> ARTEX 콘솔/플랫폼 구성</h2>
+
+    <div class="sheet-div"></div>
+
+    <h2><span class="num">2</span> ARTEX 콘솔/플랫폼 구성</h2>
     <p>테스트가 수행된 ARTEX 콘솔(<code>버전 · dev</code>)은 <strong>대화·작업·발견·트래픽·도구 실행·LLM 녹화·자산·차단 규칙·자산 차단</strong> 등
     침투 테스트 운용 기능을 단일 콘솔로 제공합니다. 본 세션은 대화(Auto)에서 작업을 오케스트레이션하고, 작업 워커가 자율 실행하며,
     발견이 플랫폼에 정식 등록되는 전 흐름을 사용했습니다.</p>
+
+    <div class="arch">
+      <p class="arch-h">단일 콘솔(ARTEX) — 운용 기능 통합 &amp; 수행 흐름</p>
+      <div class="caps">
+        <span class="cap hub">ARTEX 콘솔</span>
+        <span class="cap">대화</span><span class="cap">작업</span><span class="cap">발견</span>
+        <span class="cap">트래픽</span><span class="cap">도구 실행</span><span class="cap">LLM 녹화</span>
+        <span class="cap">자산</span><span class="cap">차단 규칙</span>
+      </div>
+      <div class="flow">
+        <div class="fnode"><span class="fi">1</span><b>대화 · Auto</b><span>작업을 오케스트레이션<br>(생성 · 지휘 · 추적)</span></div>
+        <div class="farrow">→<span class="flabel">지시</span></div>
+        <div class="fnode"><span class="fi">2</span><b>작업 워커</b><span>planner / worker가<br>도구를 자율 실행</span></div>
+        <div class="farrow">→<span class="flabel">결과</span></div>
+        <div class="fnode reg"><span class="fi">3</span><b>발견 등록</b><span>report_finding으로<br>플랫폼에 정식 등록</span></div>
+      </div>
+      <p class="arch-cap">하나의 콘솔이 대화·작업·발견·트래픽·녹화·자산·차단을 통합 제공하며,
+      <strong>대화(Auto)의 지시 → 워커의 자율 실행 → 발견의 정식 등록</strong>이 끊김 없이 한 흐름으로 이어집니다.</p>
+    </div>
   </section>
 
   <!-- 3 -->
