@@ -558,6 +558,7 @@ export default {
       'API Keys authenticate MCP clients (such as Cursor) to ScopeSentry. Configure the key in your MCP client headers after creation.'
   },
   configuration: {
+    moduleConfig: 'Module Config',
     subfinder: 'subfinder configuration',
     rad: 'rad configuration',
     system: 'system configuration',

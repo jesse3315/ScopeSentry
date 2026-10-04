@@ -69,7 +69,7 @@ const saveLoading = ref(false)
       <ElFormItem :label="t('configuration.timezone')">
         <ElInput v-model="form.timezone" />
       </ElFormItem>
-      <ElFormItem label="Module Config">
+      <ElFormItem :label="t('configuration.moduleConfig')">
         <Codemirror
           v-model="form.ModulesConfig"
           :extensions="extensions"

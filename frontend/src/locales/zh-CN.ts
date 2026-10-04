@@ -554,6 +554,7 @@ export default {
     usageDesc: 'API Key 用于 MCP 客户端（如 Cursor）连接 ScopeSentry。创建后请将 Key 配置到 MCP 客户端的 headers 中。'
   },
   configuration: {
+    moduleConfig: '模块配置',
     subfinder: 'subfinder配置',
     rad: 'rad配置',
     system: '系统配置',
