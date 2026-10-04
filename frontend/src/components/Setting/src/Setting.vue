@@ -111,67 +111,67 @@ watch(
 const copyConfig = async () => {
   const { copy, copied, isSupported } = useClipboard({
     source: `
-      // 面包屑
+      // 브레드크럼
       breadcrumb: ${appStore.getBreadcrumb},
-      // 面包屑图标
+      // 브레드크럼 아이콘
       breadcrumbIcon: ${appStore.getBreadcrumbIcon},
-      // 折叠图标
+      // 메뉴 접기 아이콘
       hamburger: ${appStore.getHamburger},
-      // 全屏图标
+      // 전체 화면 아이콘
       screenfull: ${appStore.getScreenfull},
-      // 尺寸图标
+      // 크기 아이콘
       size: ${appStore.getSize},
-      // 多语言图标
+      // 언어 선택 아이콘
       locale: ${appStore.getLocale},
-      // 标签页
+      // 탭
       tagsView: ${appStore.getTagsView},
-      // 标签页图标
+      // 탭 아이콘
       getTagsViewIcon: ${appStore.getTagsViewIcon},
       // logo
       logo: ${appStore.getLogo},
-      // 菜单手风琴
+      // 메뉴 아코디언
       uniqueOpened: ${appStore.getUniqueOpened},
-      // 固定header
+      // 헤더 고정
       fixedHeader: ${appStore.getFixedHeader},
-      // 页脚
+      // 푸터
       footer: ${appStore.getFooter},
-      // 灰色模式
+      // 회색 모드
       greyMode: ${appStore.getGreyMode},
-      // layout布局
+      // 레이아웃
       layout: '${appStore.getLayout}',
-      // 暗黑模式
+      // 다크 모드
       isDark: ${appStore.getIsDark},
-      // 组件尺寸
+      // 컴포넌트 크기
       currentSize: '${appStore.getCurrentSize}',
-      // 主题相关
+      // 테마
       theme: {
-        // 主题色
+        // 테마 색상
         elColorPrimary: '${appStore.getTheme.elColorPrimary}',
-        // 左侧菜单边框颜色
+        // 왼쪽 메뉴 테두리 색상
         leftMenuBorderColor: '${appStore.getTheme.leftMenuBorderColor}',
-        // 左侧菜单背景颜色
+        // 왼쪽 메뉴 배경 색상
         leftMenuBgColor: '${appStore.getTheme.leftMenuBgColor}',
-        // 左侧菜单浅色背景颜色
+        // 왼쪽 메뉴 밝은 배경 색상
         leftMenuBgLightColor: '${appStore.getTheme.leftMenuBgLightColor}',
-        // 左侧菜单选中背景颜色
+        // 왼쪽 메뉴 선택 배경 색상
         leftMenuBgActiveColor: '${appStore.getTheme.leftMenuBgActiveColor}',
-        // 左侧菜单收起选中背景颜色
+        // 왼쪽 메뉴 접힘 상태 선택 배경 색상
         leftMenuCollapseBgActiveColor: '${appStore.getTheme.leftMenuCollapseBgActiveColor}',
-        // 左侧菜单字体颜色
+        // 왼쪽 메뉴 글자 색상
         leftMenuTextColor: '${appStore.getTheme.leftMenuTextColor}',
-        // 左侧菜单选中字体颜色
+        // 왼쪽 메뉴 선택 글자 색상
         leftMenuTextActiveColor: '${appStore.getTheme.leftMenuTextActiveColor}',
-        // logo字体颜色
+        // 로고 글자 색상
         logoTitleTextColor: '${appStore.getTheme.logoTitleTextColor}',
-        // logo边框颜色
+        // 로고 테두리 색상
         logoBorderColor: '${appStore.getTheme.logoBorderColor}',
-        // 头部背景颜色
+        // 헤더 배경 색상
         topHeaderBgColor: '${appStore.getTheme.topHeaderBgColor}',
-        // 头部字体颜色
+        // 헤더 글자 색상
         topHeaderTextColor: '${appStore.getTheme.topHeaderTextColor}',
-        // 头部悬停颜色
+        // 헤더 마우스오버 색상
         topHeaderHoverColor: '${appStore.getTheme.topHeaderHoverColor}',
-        // 头部边框颜色
+        // 헤더 테두리 색상
         topToolBorderColor: '${appStore.getTheme.topToolBorderColor}'
       }
     `,

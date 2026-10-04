@@ -153,7 +153,7 @@ func (s *service) BatchAdd(ctx context.Context, items []BatchAddItem) ([]BatchAd
 		// 解析 YAML content
 		var fp FingerprintYaml
 		if err := yaml.Unmarshal([]byte(item.Content), &fp); err != nil {
-			result.Error = fmt.Sprintf("YAML解析失败: %v", err)
+			result.Error = fmt.Sprintf("YAML 파싱 실패: %v", err)
 			results = append(results, result)
 			failedCount++
 			continue
@@ -174,7 +174,7 @@ func (s *service) BatchAdd(ctx context.Context, items []BatchAddItem) ([]BatchAd
 		// 使用 upsert：根据 fingerprint_id 更新或插入
 		filter := bson.M{"fingerprint_id": item.ID}
 		if err := s.commonRepo.Upsert(ctx, "FingerprintRules", filter, data); err != nil {
-			result.Error = fmt.Sprintf("更新或插入失败: %v", err)
+			result.Error = fmt.Sprintf("업데이트 또는 추가 실패: %v", err)
 			results = append(results, result)
 			failedCount++
 			continue

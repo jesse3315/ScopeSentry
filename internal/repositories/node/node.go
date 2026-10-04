@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/Autumn-27/ScopeSentry/internal/i18n"
 	"github.com/Autumn-27/ScopeSentry/internal/models"
 
 	"github.com/Autumn-27/ScopeSentry/internal/database/mongodb"
@@ -65,7 +66,7 @@ func (r *repository) GetAllNodes(ctx context.Context) ([]models.NodeData, error)
 			MemNum:        hashData["memNum"],
 			MaxTaskNum:    hashData["maxTaskNum"],
 			Version:       hashData["version"],
-			ModulesConfig: hashData["modulesConfig"],
+			ModulesConfig: i18n.TranslateConfigComments(hashData["modulesConfig"]),
 		}
 		nodes = append(nodes, node)
 	}
