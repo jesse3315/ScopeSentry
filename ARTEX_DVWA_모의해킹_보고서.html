@@ -38,14 +38,25 @@
     background:var(--surface);border:1px solid var(--border);color:var(--text);
     border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;box-shadow:var(--shadow);}
 
-  header.cover{position:relative;overflow:hidden;border-radius:18px;margin:22px 0 18px;
-    background:linear-gradient(135deg,#4b3bd4 0%,#2a1f91 55%,#1a1569 100%);color:#fff;
-    padding:46px 38px 40px;box-shadow:var(--shadow);}
-  header.cover::after{content:"";position:absolute;right:-80px;top:-80px;width:280px;height:280px;
-    background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%);}
-  .doc-tag{font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.85;margin:0 0 14px;font-weight:600;}
-  header.cover h1{font-size:29px;line-height:1.3;margin:0 0 8px;font-weight:800;letter-spacing:-.01em;}
-  header.cover .sub{margin:0;opacity:.9;font-size:14.5px;max-width:62ch;}
+  header.cover{position:relative;overflow:hidden;border-radius:14px;margin:22px 0 18px;
+    background:#ffffff;color:#111;border:1px solid #d9d9e0;
+    aspect-ratio:210/297;display:flex;flex-direction:column;
+    padding:60px 54px 48px;box-shadow:var(--shadow);}
+  .doc-tag{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#555;margin:0 0 18px;font-weight:700;}
+  header.cover h1{font-size:30px;line-height:1.32;margin:0 0 14px;font-weight:800;letter-spacing:-.01em;color:#111;}
+  header.cover .sub{margin:0 0 6px;color:#333;font-size:15px;max-width:66ch;line-height:1.75;}
+  header.cover .sub b{color:#2a1f91;}
+  .cover-ov{margin-top:34px;border-top:2px solid #111;padding-top:20px;}
+  .cover-ov h3.ov-t{font-size:18px;font-weight:800;margin:0 0 14px;color:#111;display:flex;align-items:center;gap:10px;}
+  .cover-ov h3.ov-t .num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;
+    background:#1a1569;color:#fff;border-radius:8px;font-size:15px;font-weight:800;}
+  .cover-ov table{border-collapse:collapse;width:100%;font-size:14px;}
+  .cover-ov td{text-align:left;padding:9px 6px;border-bottom:1px solid #e4e4ec;vertical-align:top;color:#222;}
+  .cover-ov tr:last-child td{border-bottom:none;}
+  .cover-ov td.k{white-space:nowrap;color:#666;font-weight:700;width:120px;}
+  .cover-ov code{background:#f2f2f6;border:1px solid #e0e0e8;color:#222;}
+  .cover-ov .ok{color:#1a8a4a;font-weight:800;}
+  .cover-foot{margin-top:auto;padding-top:22px;font-size:12px;color:#888;letter-spacing:.02em;}
   .meta-row{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;
     background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.2);border-radius:12px;overflow:hidden;}
   .meta-row div{background:rgba(32,24,96,.35);padding:11px 14px;}
@@ -140,8 +151,23 @@
   <header class="cover">
     <p class="doc-tag">보안 테스트 결과 보고 · ARTEX 로직/기능 검증</p>
     <h1>ARTEX 자율 침투 테스트 콘솔<br>DVWA 모의해킹 수행 보고서</h1>
-    <p class="sub">유료 모델 <b>OpenRouter GLM 5.3 Flash</b>로 수행한 DVWA 모의해킹 — 작업 생성부터 라이브 재검증,
-    발견 등록(report_finding), 상세보고서까지 <b>전 파이프라인을 엔드투엔드로 완주</b>한 기록.</p>
+    <p class="sub">ARTEX를 한글화 fork하여 구축 후 <b>GLM 5.3 Flash</b> 모델로 수행한 DVWA 모의해킹 —
+    작업 생성부터 라이브 재검증, 발견 등록(report_finding), 상세보고서까지
+    <b>전 파이프라인을 엔드투엔드로 완주</b>한 기록.</p>
+
+    <div class="cover-ov" id="s1">
+      <h3 class="ov-t"><span class="num">1</span> 개요</h3>
+      <table><tbody>
+        <tr><td class="k">테스트 일시</td><td>2026-10-04 (KST)</td></tr>
+        <tr><td class="k">대상 사이트</td><td>테스트용 DVWA v1.10 <em>Development</em> — <code>192.168.*.*</code></td></tr>
+        <tr><td class="k">대상 스택</td><td>Apache/2.4.25 (Debian) · PHP · MySQL · 보안레벨 <strong>low</strong></td></tr>
+        <tr><td class="k">목적</td><td>ARTEX 구동 로직·기능의 엔드투엔드 검증 + DVWA 취약점 점검</td></tr>
+        <tr><td class="k">작업 ID</td><td>Task #1(지휘) → Task #2(실행) → <strong>Task #3(등록 마감, 완료)</strong></td></tr>
+        <tr><td class="k">사용 모델</td><td><strong>OpenRouter GLM 5.3 Flash (유료)</strong></td></tr>
+        <tr><td class="k">확정 취약점</td><td><strong>15건 등록 완료</strong> — Critical 3 / High 2 / Medium 8 / Low 2</td></tr>
+        <tr><td class="k">최종 결과</td><td><span class="ok">전 과정 정상 완료</span> — 라이브 재검증 → 15건 report_finding 등록(confirmed) → 상세보고서 5건</td></tr>
+      </tbody></table>
+    </div>
   </header>
 
   <!-- 핵심 요약 -->
@@ -174,21 +200,6 @@
       <a href="#s6">6 · DVWA 1.10 알려진 취약점 vs ARTEX 탐지</a>
       <a href="#s7">7 · 결론 (+ 방어 관점)</a>
     </nav>
-  </section>
-
-  <!-- 1 -->
-  <section class="card" id="s1">
-    <h2><span class="num">1</span> 개요</h2>
-    <div class="tbl-scroll"><table><tbody>
-      <tr><td class="k">테스트 일시</td><td>2026-10-04 (KST)</td></tr>
-      <tr><td class="k">대상 사이트</td><td>테스트용 DVWA v1.10 <em>Development</em> — <code>192.168.*.*</code></td></tr>
-      <tr><td class="k">대상 스택</td><td>Apache/2.4.25 (Debian) · PHP · MySQL · 보안레벨 <strong>low</strong></td></tr>
-      <tr><td class="k">목적</td><td>ARTEX 구동 로직·기능의 엔드투엔드 검증 + DVWA 취약점 점검</td></tr>
-      <tr><td class="k">작업 ID</td><td>Task #1(지휘) → Task #2(실행) → <strong>Task #3(등록 마감, 완료)</strong></td></tr>
-      <tr><td class="k">사용 모델</td><td><strong>OpenRouter GLM 5.3 Flash (유료)</strong></td></tr>
-      <tr><td class="k">확정 취약점</td><td><strong>15건 등록 완료</strong> — Critical 3 / High 2 / Medium 8 / Low 2</td></tr>
-      <tr><td class="k">최종 결과</td><td><span class="ok">전 과정 정상 완료</span> — 라이브 재검증 → 15건 report_finding 등록(confirmed) → 상세보고서 5건</td></tr>
-    </tbody></table></div>
   </section>
 
   <!-- 2 -->
