@@ -124,7 +124,7 @@ const inputClear = () => {
           v-model="search"
           class="mb-20px"
           clearable
-          placeholder="搜索图标"
+          placeholder="아이콘 검색"
           @clear="inputClear"
         />
         <ElTabs tab-position="left" v-model="iconName" @tab-change="tabChange">

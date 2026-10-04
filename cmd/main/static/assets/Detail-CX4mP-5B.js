@@ -1,0 +1,1 @@
+import{_ as i}from"./Detail.vue_vue_type_script_setup_true_lang-CIpxfRjM.js";import"./index-ruPSmEJT.js";import"./el-form-D8G5FjOo.js";import"./castArray-DQAfFgHf.js";import"./el-col-4pWPiDpb.js";import"./el-divider-DVcILKiX.js";import"./index-BVMg0uKm.js";import"./index-CSmlloP6.js";import"./index-B7SpsySK.js";export{i as default};

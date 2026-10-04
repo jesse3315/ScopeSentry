@@ -258,7 +258,7 @@ const fetchData = async (id: string) => {
         form.value.parameterList = []
       }
     } else {
-      ElMessage.error(`数据加载失败：${res.message}`)
+      ElMessage.error(`데이터 로드 실패: ${res.message}`)
     }
   } catch (error) {
     console.error('查询数据时发生错误:', error)
@@ -281,18 +281,18 @@ watch(
 const save = async () => {
   saveLoading.value = true // 开始加载状态
   if (form.value.name == '') {
-    ElMessage.error('name 不能为空')
+    ElMessage.error('name은(는) 비워둘 수 없습니다')
     saveLoading.value = false // 结束加载状态
     return
   }
   if (form.value.module == '' && props.tp == 'scan') {
-    ElMessage.error('module 不能为空')
+    ElMessage.error('module은(는) 비워둘 수 없습니다')
     saveLoading.value = false // 结束加载状态
     return
   }
   if (!isSystem.value) {
     if (content.value == '') {
-      ElMessage.error('源码 不能为空')
+      ElMessage.error('소스 코드는 비워둘 수 없습니다')
       saveLoading.value = false // 结束加载状态
       return
     }
@@ -321,7 +321,7 @@ const save = async () => {
     props.getList()
   } catch (error) {
     console.error('保存数据时发生错误:', error)
-    ElMessage.error('保存失败，请稍后再试。')
+    ElMessage.error('저장에 실패했습니다. 잠시 후 다시 시도하세요.')
   } finally {
     saveLoading.value = false // 结束加载状态
   }

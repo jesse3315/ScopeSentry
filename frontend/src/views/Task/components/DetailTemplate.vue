@@ -414,7 +414,7 @@ const onSubmit = async () => {
   saveLoading.value = true
   const result: Record<string, any> = {}
   if (templateName.value == '') {
-    ElMessage.error('name 不能为空')
+    ElMessage.error('name은(는) 비워둘 수 없습니다')
     saveLoading.value = false
     return
   }
@@ -776,7 +776,7 @@ const handleCheckChange = (data, checked) => {
     </div>
     <ElRow>
       <ElCol :span="12" style="text-align: right">
-        <ElButton type="primary" @click="onSubmit" :loading="saveLoading"> 保存 </ElButton>
+        <ElButton type="primary" @click="onSubmit" :loading="saveLoading"> 저장 </ElButton>
       </ElCol>
     </ElRow>
   </ElForm>

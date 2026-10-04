@@ -169,9 +169,9 @@ onMounted(() => {
 const handleUpdate = async () => {
   try {
     // 二次确认
-    await ElMessageBox.confirm(`确定要更新 ${updateCount.value} 条指纹数据吗？`, '确认更新', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
+    await ElMessageBox.confirm(`핑거프린트 데이터 ${updateCount.value}건을 업데이트하시겠습니까?`, '업데이트 확인', {
+      confirmButtonText: '확인',
+      cancelButtonText: '취소',
       type: 'warning'
     })
 
@@ -182,7 +182,7 @@ const handleUpdate = async () => {
     const fingerprints = fingerprintsRes.data.data || []
 
     if (fingerprints.length === 0) {
-      ElMessage.warning('没有需要更新的数据')
+      ElMessage.warning('업데이트할 데이터가 없습니다')
       updateLoading.value = false
       return
     }
@@ -190,7 +190,7 @@ const handleUpdate = async () => {
     // 批量添加指纹
     await batchAddFingerprintApi(fingerprints)
 
-    ElMessage.success(`成功更新 ${fingerprints.length} 条指纹数据`)
+    ElMessage.success(`핑거프린트 데이터 ${fingerprints.length}건을 업데이트했습니다`)
 
     // 刷新列表和数量
     await getList()
@@ -198,7 +198,7 @@ const handleUpdate = async () => {
   } catch (error: any) {
     if (error !== 'cancel') {
       console.error('Error updating fingerprints:', error)
-      ElMessage.error(error?.message || '更新失败，请稍后重试')
+      ElMessage.error(error?.message || '업데이트에 실패했습니다. 잠시 후 다시 시도하세요')
     }
   } finally {
     updateLoading.value = false
@@ -240,7 +240,7 @@ const handleUpdate = async () => {
         <div class="mb-10px">
           <ElBadge :value="updateCount" :hidden="updateCount === 0" :max="999999">
             <BaseButton type="success" :loading="updateLoading" @click="handleUpdate">
-              {{ t('common.update') || '更新' }}
+              {{ t('common.update') || '업데이트' }}
             </BaseButton>
           </ElBadge>
         </div>

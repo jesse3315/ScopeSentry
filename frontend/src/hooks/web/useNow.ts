@@ -25,7 +25,7 @@ export const useNow = (immediate = true) => {
 
     state.year = now.get('y')
     state.month = now.get('M') + 1
-    state.week = '星期' + ['日', '一', '二', '三', '四', '五', '六'][now.day()]
+    state.week = ['일', '월', '화', '수', '목', '금', '토'][now.day()] + '요일'
     state.day = now.get('date')
     state.hour = h
     state.minute = m
