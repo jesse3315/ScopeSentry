@@ -136,9 +136,9 @@
     </div>
   </header>
 
-  <!-- 경영진 요약 -->
+  <!-- 핵심 요약 -->
   <section class="card lead">
-    <h2><span class="num">●</span> 경영진 요약 (Executive Summary)</h2>
+    <h2><span class="num">●</span> 핵심 요약</h2>
     <p>본 테스트는 자율 침투 테스트 플랫폼 <strong>ARTEX</strong>가 보안 교육용 취약 웹앱(DVWA, <code>100.11.*.*</code>)을
     대상으로 <strong>모의해킹 작업을 스스로 생성·실행·추적하는 로직이 정상 동작하는지</strong>를 검증할 목적으로 수행되었습니다.</p>
     <div class="verdict">
@@ -157,9 +157,10 @@
       <div class="box"><div class="v">2</div><div class="k">Low</div></div>
       <div class="box"><div class="v">5</div><div class="k">계정 크랙·로그인 재현</div></div>
     </div>
-    <p style="margin-top:16px"><strong>경영 시사점</strong> — 대상 환경은 교육용 취약 앱으로, 실제 자산이 아닙니다. 본 보고의 핵심 성과는
-    <strong>ARTEX 플랫폼이 실제 공격 시나리오를 자율적으로 구동·추적할 수 있음을 실증</strong>한 것이며, 상용 운용을 위해서는
-    <strong>충분한 모델 쿼터 확보</strong>와 <strong>발견 자동 등록 파이프라인의 종단 검증</strong>이 선행되어야 합니다.</p>
+    <p style="margin-top:16px"><strong>요지</strong> — 대상 환경은 교육용 취약 앱으로, 실제 자산이 아닙니다. 본 테스트는
+    <strong>ARTEX의 구동 로직·기능이 실제 공격 시나리오에서 동작하는지를 빠르게 실증</strong>하기 위한 것으로,
+    그 목적은 충분히 달성되었습니다. 이번 세션에서 미검증으로 남은 <strong>자동 익스플로잇 단계</strong>와
+    <strong>발견 자동 등록 파이프라인</strong>은 후속 세션에서 이어서 확인하면 됩니다.</p>
   </section>
 
   <section class="card">
@@ -348,7 +349,7 @@
   <!-- 6 -->
   <section class="card" id="s6">
     <h2><span class="num">6</span> 리스크 평가와 권고</h2>
-    <h3>플랫폼 운용 관점 (경영진)</h3>
+    <h3>플랫폼 관점 (후속 검증 과제)</h3>
     <ol>
       <li><strong>모델 쿼터 확보</strong> — 무료 티어의 분당 한도가 자율 실행의 병목. 유료·전용 모델 또는 크레딧 충전으로 안정적 처리량 확보.</li>
       <li><strong>발견 등록 파이프라인 종단 검증</strong> — 쿼터 리셋 후 planner가 인계 힌트를 <code>report_finding</code>으로 등록해 대시보드 집계까지 완결되는지 확인.</li>
@@ -373,9 +374,9 @@
     <p>ARTEX는 <strong>단일 대화 지시만으로 침투 테스트 작업을 자율 생성·실행·추적</strong>하는 핵심 오케스트레이션 로직이
     정상 동작함을 실증했습니다. 외부 모델 레이트 리밋이라는 운영 변수에도 플랫폼은 장애를 정확히 분류하고,
     대화 레이어가 테스트를 완수하는 <strong>복원력</strong>을 보였으며, 그 결과 Critical 3건을 포함한 12종 취약점을 확정했습니다.</p>
-    <p>남은 과제는 두 가지로 요약됩니다. ① <strong>모델 쿼터 확보</strong>를 통한 자동 익스플로잇 단계의 end-to-end 재검증,
-    ② <strong>발견 자동 등록(<code>report_finding</code>) 파이프라인의 종단 완결</strong>. 이 두 가지가 충족되면 ARTEX는 상용
-    자율 침투 테스트 운용 요건을 갖추게 됩니다.</p>
+    <p>본 테스트는 ARTEX의 로직·기능을 빠르게 실증하기 위한 것으로, 그 목적은 달성되었습니다. 이번 세션에서
+    미검증으로 남은 과제는 두 가지입니다. ① <strong>모델 쿼터 확보</strong>를 통한 자동 익스플로잇 단계의 end-to-end 재검증,
+    ② <strong>발견 자동 등록(<code>report_finding</code>) 파이프라인의 종단 완결</strong>. 두 과제는 후속 세션에서 이어서 확인하면 됩니다.</p>
     <div class="verdict" style="margin-top:14px">
       <span class="chip ok">종합 판정 : 플랫폼 로직 검증 성공</span>
       <span class="chip warn">조건 : 쿼터 확보 후 자동 단계 재검증</span>
