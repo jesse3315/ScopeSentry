@@ -1,0 +1,45 @@
+# 이 포크의 소스(한국어 UI 포함)에서 ScopeSentry 서버 이미지를 직접 빌드합니다.
+# 사용법: docker compose -f single-host-deployment.yml up -d --build
+# (기존 dockerfile 은 릴리스 워크플로가 goreleaser 결과물을 담을 때 사용하므로 그대로 둡니다.)
+
+# 1) 프론트엔드 빌드
+FROM node:20-bookworm-slim AS frontend
+WORKDIR /src/frontend
+ENV HUSKY=0
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+COPY frontend/ ./
+RUN npx vite build --mode pro && test -d dist-pro
+
+# 2) Go 서버 빌드 (프론트엔드 결과물을 cmd/main/static 에 넣은 뒤 embed)
+FROM golang:1.24-bookworm AS server
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+# 릴리스 워크플로와 동일하게 static 에 덮어쓰되, 이전 빌드의 해시 번들은 지웁니다.
+RUN rm -rf cmd/main/static/assets
+COPY --from=frontend /src/frontend/dist-pro/ cmd/main/static/
+# 버전은 DB 마이그레이션 판단에 쓰이므로 version.json 의 server 값을 사용합니다.
+RUN VERSION=$(sed -n 's/.*"server" *: *"\([^"]*\)".*/\1/p' version.json) && \
+    test -n "$VERSION" && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOAMD64=v1 \
+    go build -trimpath -ldflags "-s -w -X github.com/Autumn-27/ScopeSentry/internal/constants.Version=${VERSION}" \
+      -o /out/ScopeSentry ./cmd/main/main.go
+
+# 3) 실행 이미지 (원본 dockerfile 과 같은 베이스/패키지 구성 유지)
+FROM python:3.7-slim
+
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt-get update && \
+    apt-get install -y git curl ca-certificates libcurl4-openssl-dev vim unzip && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/ScopeSentry/
+COPY --from=server /out/ScopeSentry /opt/ScopeSentry/ScopeSentry
+RUN chmod +x /opt/ScopeSentry/ScopeSentry
+
+ENTRYPOINT ["/opt/ScopeSentry/ScopeSentry"]

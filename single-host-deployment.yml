@@ -43,7 +43,11 @@ services:
       - scopesentry-network
 
   scope-sentry:
-    image: autumn27/scopesentry:latest
+    # 원본 이미지(autumn27/scopesentry) 대신 이 포크의 소스(한국어 UI)로 빌드합니다.
+    build:
+      context: .
+      dockerfile: Dockerfile.source
+    image: scopesentry-ko:local
     container_name: scope-sentry
     restart: always
     ports:

@@ -37,12 +37,14 @@ Scope Sentry는 자산 매핑, 서브도메인 열거, 정보 유출 탐지, 취
 
 ## 설치
 ```
-git clone https://github.com/Autumn-27/ScopeSentry.git
+git clone https://github.com/jesse3315/ScopeSentry.git
 cd ScopeSentry
 # .env 파일에서 MongoDB와 Redis 계정 비밀번호를 변경하세요.
-docker-compose -f single-host-deployment.yml up -d
+docker compose -f single-host-deployment.yml up -d --build
 ```
 실행하면 mongodb, redis, scope-sentry(서버), scopesentry-scan(스캐너) 네 개의 컨테이너가 생성됩니다. 기본적으로 스캔 노드 1개가 포함됩니다.
+
+> **한국어판 서버 이미지:** `scope-sentry` 서버는 원본 이미지(`autumn27/scopesentry`)를 받지 않고, 이 저장소의 소스로 `Dockerfile.source`를 사용해 직접 빌드합니다(`scopesentry-ko:local`). 첫 실행 시 프론트엔드와 Go 빌드 때문에 몇 분 정도 걸립니다. 소스를 업데이트(`git pull`)한 뒤에는 `--build` 옵션을 붙여 다시 실행하세요. 스캔 노드(`scopesentry-scan`)는 화면이 없으므로 원본 이미지를 그대로 사용합니다.
 
 초기 사용자 비밀번호와 플러그인 2차 인증 비밀번호 확인
 
