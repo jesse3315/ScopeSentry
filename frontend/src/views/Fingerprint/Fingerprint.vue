@@ -209,8 +209,8 @@ const handleUpdate = async () => {
 <template>
   <ContentWrap>
     <ElRow :gutter="20" style="margin-bottom: 15px">
-      <ElCol :span="1">
-        <ElText class="mx-1" style="position: relative; top: 8px; left: 30%"
+      <ElCol :span="1" class="col-auto">
+        <ElText class="mx-1" style="position: relative; top: 8px"
           >{{ t('fingerprint.name') }} :</ElText
         >
       </ElCol>
@@ -219,24 +219,24 @@ const handleUpdate = async () => {
       </ElCol>
       <ElCol :span="5">
         <ElButton type="primary" :icon="searchicon" style="height: 38px" @click="handleSearch"
-          >Search</ElButton
+          >{{ t('common.search') }}</ElButton
         >
       </ElCol>
     </ElRow>
-    <ElRow :gutter="60">
-      <ElCol :span="1">
+    <ElRow :gutter="12">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <ElButton type="primary" @click="addSensitive">{{ t('common.new') }}</ElButton>
         </div>
       </ElCol>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <BaseButton type="danger" :loading="delLoading" @click="confirmDelete">
             {{ t('common.delete') }}
           </BaseButton>
         </div>
       </ElCol>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <ElBadge :value="updateCount" :hidden="updateCount === 0" :max="999999">
             <BaseButton type="success" :loading="updateLoading" @click="handleUpdate">

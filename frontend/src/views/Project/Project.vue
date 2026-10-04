@@ -136,7 +136,7 @@ const selectedRowIds = ref([])
           </ElFormItem>
         </ElForm>
       </ElCol>
-      <ElCol v-if="multipleSelection" :span="1">
+      <ElCol v-if="multipleSelection" :span="1" class="col-auto">
         <ElDropdown trigger="click">
           <ElButton plain class="custom-button align-bottom">
             {{ t('common.operation') }}

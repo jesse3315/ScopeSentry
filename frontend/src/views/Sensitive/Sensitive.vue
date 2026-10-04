@@ -189,8 +189,8 @@ const updateState = async (state) => {
 <template>
   <ContentWrap>
     <ElRow :gutter="20" style="margin-bottom: 15px">
-      <ElCol :span="1">
-        <ElText class="mx-1" style="position: relative; top: 8px; left: 30%"
+      <ElCol :span="1" class="col-auto">
+        <ElText class="mx-1" style="position: relative; top: 8px"
           >{{ t('sensitiveInformation.sensitiveName') }} :</ElText
         >
       </ElCol>
@@ -199,27 +199,27 @@ const updateState = async (state) => {
       </ElCol>
       <ElCol :span="5">
         <ElButton type="primary" :icon="searchicon" style="height: 38px" @click="handleSearch"
-          >Search</ElButton
+          >{{ t('common.search') }}</ElButton
         >
       </ElCol>
     </ElRow>
-    <ElRow :gutter="60">
-      <ElCol :span="1">
+    <ElRow :gutter="12">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <ElButton type="primary" @click="addSensitive">{{ t('common.new') }}</ElButton>
         </div>
       </ElCol>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <ElButton type="success" @click="updateState(true)">{{ t('common.on') }}</ElButton>
         </div>
       </ElCol>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <ElButton type="danger" @click="updateState(false)">{{ t('common.off') }}</ElButton>
         </div>
       </ElCol>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <BaseButton type="danger" :loading="delLoading" @click="confirmDelete">
             {{ t('common.delete') }}

@@ -528,7 +528,7 @@ const setMaxHeight = () => {
 <template>
   <ContentWrap>
     <ElRow>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <ElText class="mx-1" style="position: relative; top: 8px">{{ t('task.taskName') }}:</ElText>
       </ElCol>
       <ElCol :span="5">
@@ -536,7 +536,7 @@ const setMaxHeight = () => {
       </ElCol>
       <ElCol :span="5" style="position: relative; left: 16px">
         <ElButton type="primary" :icon="searchicon" style="height: 100%" @click="handleSearch"
-          >Search</ElButton
+          >{{ t('common.search') }}</ElButton
         >
       </ElCol>
     </ElRow>
