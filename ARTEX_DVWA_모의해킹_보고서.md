@@ -59,26 +59,26 @@ flowchart LR
 > 테스트용 DVWA사이트를 모의해킹하라. ARTEX 돌아가는 로직과 기능을 테스트하기 위함이다.
 > 작업은 녹화하고 사용하는 도구 등 기록하라. 목표 `http://192.168.*.*`
 
-### 3.1 대화 장면 재구성 — Auto의 독백 🎬
+### 3.1 대화 흐름 재구성 — Auto의 판단 과정
 
 그림 1~3의 대화에는 Auto 에이전트의 사고(reasoning)가 영문으로 기록된다. 아래는 각
-메시지를 장면처럼 드라마틱하게 풀어 쓴 해석으로, 유료 GLM 5.3 Flash가 작업을 어떻게
-이어받아 끝까지 밀어붙였는지를 보여준다.
+메시지를 수행 순서에 따라 정리한 것으로, GLM 5.3 Flash가 멈춰 있던 작업을 어떻게 이어받아
+등록까지 완료했는지를 단계별로 보여준다.
 
-- **지시를 받다** — *"The user wants to test a DVWA site … for testing the ARTEX platform's logic."*
-  → 명령이 떨어졌다. **"이 DVWA를 뚫어, ARTEX가 어디까지 해내는지 보여라."** 이번엔 중간에
-  멈추지 않는다 — 유료 엔진을 달았다.
-- **기존 진척을 발견하다** — *"There are existing paused tasks."*
-  → 백지가 아니다. 멈춰 선 작업 두 개(①ARTEX 테스트 ②레이트리밋 우회 서브태스크)가 남아 있다.
-  **"처음부터 다시 하지 않는다. 멈춘 지점에서 이어 붙인다."**
-- **증거를 되짚다** — *"Evidence files exist in conv-1. … Evidence confirmed for the critical/high findings."*
-  → 이전 세션이 남긴 **증거 47개**를 펼친다. 핵심 4건(SQLi·RCE·웹셸·LFI)이 멀쩡히 살아 있다.
-  **"기록은 거짓말하지 않는다. 그러나 나는 직접 눈으로 확인한다."**
-- **라이브로 다시 찌른다** — *"Login successful, security=low confirmed. … All 5 re-verified live."*
-  → `admin/password` 로그인 성공, 보안레벨 low 확인. 그리고 **지금 이 순간** 다섯 급소를 다시
-  찌른다 — 전부 재현. **"과거의 증거가 아니라, 살아 있는 증거다."**
-- **전리품을 등록하다** — *"Asset 3 confirmed … Now register the 15 findings."*
-  → 자산 id=3 확인. **"이제 15개의 취약점을 플랫폼에 정식으로 새긴다."** 작전의 마지막 장(章)이다.
+- **1 · 지시 수신** — *"The user wants to test a DVWA site … for testing the ARTEX platform's logic."*
+  → 사용자 지시를 수신했다. 대상은 테스트용 DVWA이며, 목적은 ARTEX의 로직·기능 검증이다.
+  이번 수행은 유료 모델로 전환해 중단 없이 진행한다.
+- **2 · 기존 진척 확인** — *"There are existing paused tasks."*
+  → 작업이 백지 상태가 아니라, 이전에 멈춰 있던 작업 두 개(①ARTEX 테스트 ②레이트리밋 우회
+  서브태스크)가 남아 있음을 확인했다. 처음부터 다시 하지 않고 멈춘 지점에서 이어서 진행한다.
+- **3 · 증거 재확인** — *"Evidence files exist in conv-1. … Evidence confirmed for the critical/high findings."*
+  → 이전 세션이 남긴 증거 47개를 확인했다. 핵심 4건(SQLi·RCE·웹셸·LFI)이 유효했으나,
+  기록에만 의존하지 않고 직접 재확인하기로 했다.
+- **4 · 라이브 재검증** — *"Login successful, security=low confirmed. … All 5 re-verified live."*
+  → `admin/password` 로그인 성공, 보안레벨 low를 확인했다. 이어서 다섯 건을 실제 요청으로
+  다시 검증해 전부 재현했다.
+- **5 · 발견 등록** — *"Asset 3 confirmed … Now register the 15 findings."*
+  → 자산 id=3을 확인한 뒤, 15건의 취약점을 플랫폼에 report_finding으로 정식 등록했다.
 
 ### 3.2 작업 인계 및 기존 진척 확인
 
