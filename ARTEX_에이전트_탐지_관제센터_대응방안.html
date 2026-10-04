@@ -168,8 +168,8 @@
         <p class="x">같은 IP가 <code>artex-enrich/1.0</code>·Go HTTP·curl·<b>모바일(Pixel 10) 에뮬레이션 헤드리스 Chromium</b>까지
         상이한 UA·TLS 지문을 <b>한 세션에서 번갈아</b> 낸다.</p></div>
       <div class="f"><div class="n">3</div><p class="t">LLM 리듬 — 버스트 후 쿨다운</p>
-        <p class="x">추론 지연·레이트리밋·휴먼승인 대기로 <b>짧은 폭주 → 수십 초~수 분 침묵 → 재개</b>의 계단형 리듬.
-        스캐너의 연속 폭주와도, 사람의 불규칙과도 다른 <b>기계적·간헐적 패턴</b>.</p></div>
+        <p class="x">추론 지연·레이트리밋·휴먼승인 대기로 <b>짧은 폭주 → 침묵 → 재개</b>의 계단형 리듬.
+        단 <b>수 분 침묵은 무료 티어 한정</b>이고 유료 모델에선 약해짐 — tool-call당 추론 지연(초 단위)은 등급 무관 잔존해 스캐너의 연속 폭주와 구별.</p></div>
     </div>
   </section>
 
@@ -183,7 +183,7 @@
         <tr><td><strong>traffic 기록 프록시</strong></td><td>모든 타깃 트래픽을 MITM 프록시로 라우팅·녹화, 자체 CA로 HTTPS 재서명</td><td><b>단일 egress IP에 다종 벡터 집중</b>; 내부망 가시 시 HTTP_PROXY·사설 루트 CA 신뢰 = 호스트 IOC</td></tr>
         <tr><td><strong>enrich 엔진</strong></td><td>dnsx 해석 + HTTP 프로브(제목/파비콘/기술스택), 응답 1 MiB 캡, <code>cool</code> 맵 중복 억제</td><td>UA 리터럴 <code>artex-enrich/1.0</code>; 자산별 <b>단발·비중복 프로브</b></td></tr>
         <tr><td><strong>agent(planner/worker/chat)</strong></td><td>LLM이 WebFetch·Bash로 정찰→익스플로잇, tool-call 단위</td><td><b>적응형 다단계 체인</b>(응답 파싱 후 다음 요청), tool-call 간 <b>모델 지연 갭</b></td></tr>
-        <tr><td><strong>llmpool 페일오버</strong></td><td>429/5xx 시 모델 교체, 백오프 1분→5분→30분, softTrip 누적</td><td><b>다분 침묵 후 재개</b>; 분당 한도(무료 20/min) 초과 시 공격 일시 정지</td></tr>
+        <tr><td><strong>llmpool 페일오버</strong></td><td>429/5xx 시 모델 교체, 백오프 1분→5분→30분, softTrip 누적</td><td><b>다분 침묵 후 재개</b>; 분당 한도 초과 시 일시 정지 — <b>다분 침묵은 무료 티어 한정, 유료 모델엔 약함</b></td></tr>
         <tr><td><strong>guard + intercept(ask)</strong></td><td>위험 tool-call 차단/휴먼 승인 대기(블로킹)</td><td>승인 대기 중 <b>능동 트래픽 정지</b>(또 다른 리듬 갭)</td></tr>
         <tr><td><strong>llmrec 레코더</strong></td><td>모든 LLM 요청/응답·토큰 전량 기록</td><td>(공격측 산출물) — 침해 역추적 시 <b>증거·TTP 재구성 소스</b></td></tr>
         <tr><td><strong>skills: playwright-cli</strong></td><td>헤드리스 Chromium, Pixel 10/iPhone 17 모바일 에뮬레이션</td><td><b>모바일 UA ↔ 데이터센터 IP/TLS 불일치</b>; JS 실행하나 인적 상호작용 부재</td></tr>
@@ -223,7 +223,7 @@
     <h3><span class="step">4.1</span> LLM 리듬 — 버스트/쿨다운 계단형</h3>
     <ul>
       <li>tool-call마다 <b>모델 추론 지연(수 초)</b> 삽입 → 연속 폭주가 아닌 <b>작은 버스트 + 규칙적 갭</b>.</li>
-      <li>429/5xx 시 백오프(<b>1분 → 5분 → 30분</b>) → <b>수 분 침묵 후 정확히 재개</b>. 무료 티어 <b>분당 20요청</b> 초과 시 엔진 정지 후 창 리셋 재가동(본 세션 실측).</li>
+      <li>429/5xx 시 백오프(<b>1분 → 5분 → 30분</b>) → <b>수 분 침묵 후 재개</b>. 무료 티어 <b>분당 20요청</b> 초과 시 엔진 정지 후 재가동(본 세션 실측). <b>단 수 분 침묵은 무료 티어 특성으로 유료 모델에선 거의 사라짐</b> — tool-call당 추론 지연(초 단위)은 등급 무관 잔존.</li>
       <li><b>탐지(시간분포)</b>: 요청 간격 <b>저엔트로피 + 수 분 주기 침묵/재개</b> 반복 = 자동 에이전트. 사람은 불규칙, 스캐너는 고밀도 연속 — ARTEX는 <b>중밀도·간헐·정시 재개</b>로 구별.</li>
     </ul>
 
@@ -301,7 +301,7 @@
     <h2><span class="num">7</span> 대응 플레이북 (AI 에이전트 공격)</h2>
     <h3><span class="step">7.1</span> 능동 완화 — "리듬을 깨라"</h3>
     <ol>
-      <li><b>레이트 리밋/속도 제한</b>이 가장 실효적. ARTEX는 상위 LLM 분당 한도(429)만으로도 자동 엔진이 멈췄다 — <b>방어측 속도 제한은 자동화 공격을 구조적으로 지연·중단</b>시킨다.</li>
+      <li><b>레이트 리밋/속도 제한</b>은 공격 비용·시간을 올리는 <b>심층 방어의 한 겹</b>. 단, 본 세션의 정지는 <b>무료 티어 분당 20회 한도(429)</b>에 따른 <b>테스트 환경 산물</b>이며 <b>유료·전용 모델에선 완화·소멸해 엔진이 멈추지 않는다</b> — <b>결정적 차단책이 아니다.</b> 적응형 체인 탐지·인증 강화와 함께 보조로 운용.</li>
       <li><b>단일 egress IP 차단/챌린지</b> — 집중 egress 특성상 IP 레벨 대응의 비용 대비 효과가 크다.</li>
       <li><b>봇 챌린지(PoW/JS/행위)</b> — 헤드리스 Chromium은 통과하나, Go/curl 경로와 모바일UA 모순이 챌린지 단계에서 추가 노출된다.</li>
     </ol>
@@ -338,7 +338,7 @@
       <li><b>"모바일 UA ↔ 데이터센터 IP"</b> 불일치를 상시 플래그.</li>
       <li><b>시간분포를 본다</b> — 저엔트로피 간격 + 수분 주기 침묵/재개 = 자동 에이전트 서명.</li>
       <li><b>적응형 체인을 상관으로 잡는다</b> — 민감응답→논리적 후속(인증성공)은 Critical.</li>
-      <li><b>레이트 리밋으로 구조적 완화</b> — LLM 한도만으로도 멈추는 특성을 방어측이 선제 적용.</li>
+      <li><b>레이트 리밋은 보조 수단</b> — 공격 비용·시간은 올리나 유료 모델 공격자는 멈추지 않는다(무료 티어 한정 효과). 결정타로 삼지 말 것.</li>
       <li><b>다지표 합산 판정</b> — 단일 UA/IP가 아니라 복수 지표 상관으로 오탐을 줄인다.</li>
     </ol>
   </section>
@@ -370,7 +370,7 @@
     <div class="tbl-scroll"><table>
       <thead><tr><th>단계</th><th>기간/비용</th><th>실행 항목</th><th>기대 효과</th></tr></thead>
       <tbody>
-        <tr><td><b>1. 즉시</b></td><td>당일·비용 0</td><td><code>artex-*</code> UA 룰화, 모바일UA↔DC 불일치 플래그, <b>표적 서비스 레이트 리밋</b></td><td>조기경보 + 자동화 공격의 구조적 지연·중단</td></tr>
+        <tr><td><b>1. 즉시</b></td><td>당일·비용 0</td><td><code>artex-*</code> UA 룰화, 모바일UA↔DC 불일치 플래그, <b>레이트 리밋(보조)</b></td><td>조기경보 + 공격 비용·시간 상승(유료 모델엔 제한적)</td></tr>
         <tr><td><b>2. 단기</b></td><td>수주</td><td>JA3/JA4 수집, "단일 IP·세션창 내 벡터 ≥ 3종" 상관룰, 시간분포 탐지</td><td>다지표 1차 판정 체계 확립</td></tr>
         <tr><td><b>3. 중기</b></td><td>분기</td><td>UEBA "민감응답→인증성공" 상관, 리듬 시계열 이상탐지, <b>ARTEX 지문 사전·TTP 템플릿</b></td><td>견고 지표 기반 고신뢰 자동판정</td></tr>
         <tr><td><b>4. 상시</b></td><td>거버넌스</td><td>"AI 에이전트 탐지"를 상시 관제 범주로 편입, 지문 사전 지속 갱신</td><td>신종·변종 자율 에이전트 대응 지속성</td></tr>
@@ -395,7 +395,7 @@
 
     <h3><span class="step">10.6</span> 한 문장 요약</h3>
     <div class="oneliner">취약점이 아니라 에이전트를 탐지하라. 바꾸기 쉬운 시그니처는 공짜 알림으로 깔고,
-    바꾸기 어려운 LLM의 리듬과 적응 체인에 판정을 걸며, 레이트 리밋으로 구조를 무너뜨려라.</div>
+    바꾸기 어려운 <b style="color:#fff">응답 의존적 적응 체인(의미 상관)에 판정을 걸고</b>, 다지표 상관과 인증 강화·자격증명 위생으로 겹겹이 막아라.</div>
   </section>
 
   <footer>
