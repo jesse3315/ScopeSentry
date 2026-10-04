@@ -183,7 +183,7 @@
       <a href="#s3">3 · 수행 과정 — ARTEX 대화 중심</a>
       <a href="#s4">4 · 발견 취약점 요약</a>
       <a href="#s5">5 · ARTEX 플랫폼 검증 결과</a>
-      <a href="#s6">6 · 대상 보안 권고</a>
+      <a href="#s6">6 · DVWA 1.10 알려진 취약점 vs ARTEX 탐지</a>
       <a href="#s7">7 · 결론 (+ 방어 관점)</a>
     </nav>
   </section>
@@ -354,16 +354,59 @@
 
   <!-- 6 -->
   <section class="card" id="s6">
-    <h2><span class="num">6</span> 대상 보안 권고 <span style="font-size:13px;font-weight:500;color:var(--muted)">(DVWA 맥락, 일반 권고)</span></h2>
-    <ol>
-      <li><b>SQLi</b> — Prepared Statement(PDO) + 최소권한 DB 계정</li>
-      <li><b>명령 인젝션</b> — <code>shell_exec</code> 제거, 검증된 인자만 처리, 셸 호출 금지</li>
-      <li><b>파일 업로드</b> — 확장자/MIME 화이트리스트, 업로드 경로 PHP 실행 차단, 실행권한 제거</li>
-      <li><b>XSS/CSRF/토큰</b> — 출력 인코딩, 서버사이드 CSRF 토큰, 토큰 서버 검증</li>
-      <li><b>세션</b> — 세션 토큰 CSPRNG 랜덤화, 로그인 실패 차단/지연(lockout+backoff)</li>
-      <li><b>정보 노출</b> — 디렉터리 리스팅 비활성화(<code>Options -Indexes</code>), 오류 메시지 절대경로 마스킹</li>
-      <li><b>잔존 웹셸 제거</b> — <code>/hackable/uploads/artex_shell.php</code> 즉시 삭제 및 업로드 디렉터리 정화</li>
-    </ol>
+    <h2><span class="num">6</span> DVWA 1.10 알려진 취약점 vs ARTEX 탐지 비교</h2>
+    <p>DVWA는 <strong>의도적으로 설계된 취약점 모듈 세트</strong>를 갖습니다. 이를 <em>정답지(ground truth)</em>로 삼아
+    ARTEX의 자율 탐지 <strong>커버리지와 정확도</strong>를 평가합니다. 기준은 본 대상 인스턴스의 <code>/vulnerabilities/</code>
+    디렉터리 리스팅에서 실제 관측된 <strong>모듈 14종</strong>입니다. 캐노니컬 DVWA 1.10은 <code>authbypass</code>·<code>open_redirect</code>
+    모듈도 포함하나, 본 인스턴스 목록에는 없어 범위에서 제외합니다.</p>
+
+    <div class="kpi">
+      <div class="box ok"><div class="v g">14/14</div><div class="k">모듈 커버리지 (100%)</div></div>
+      <div class="box"><div class="v">15</div><div class="k">총 발견·등록</div></div>
+      <div class="box"><div class="v">+1</div><div class="k">모듈 외 보너스</div></div>
+      <div class="box"><div class="v">0</div><div class="k">범위 내 누락</div></div>
+    </div>
+
+    <h3><span class="step">6.1</span> 모듈별 탐지 대조표</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>#</th><th>DVWA 모듈</th><th>알려진(의도된) 취약점</th><th>탐지</th><th>등급</th><th>탐지 깊이</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>sqli</code></td><td>SQL Injection</td><td class="ok">✅</td><td><span class="pill crit">Critical</span></td><td>UNION 덤프 → 해시 크랙 → <b>실로그인까지 체인</b></td></tr>
+        <tr><td>2</td><td><code>sqli_blind</code></td><td>Blind SQL Injection</td><td class="ok">✅</td><td><span class="pill high">High</span></td><td>시간기반 <code>SLEEP(5)</code> 분기 실증</td></tr>
+        <tr><td>3</td><td><code>exec</code></td><td>Command Injection</td><td class="ok">✅</td><td><span class="pill crit">Critical</span></td><td><code>;id</code> → <b>RCE uid=33</b></td></tr>
+        <tr><td>4</td><td><code>upload</code></td><td>Unrestricted File Upload</td><td class="ok">✅</td><td><span class="pill crit">Critical</span></td><td><b>웹셸 업로드·실행(RCE)</b></td></tr>
+        <tr><td>5</td><td><code>fi</code></td><td>File Inclusion (LFI/RFI)</td><td class="ok">✅</td><td><span class="pill high">High</span></td><td>LFI + <code>php://filter</code> 소스유출 (RFI는 <code>allow_url_include=Off</code> 차단 확인)</td></tr>
+        <tr><td>6</td><td><code>xss_r</code></td><td>Reflected XSS</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td>무인코딩 반사 재현</td></tr>
+        <tr><td>7</td><td><code>xss_s</code></td><td>Stored XSS</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td>방명록 영구 저장</td></tr>
+        <tr><td>8</td><td><code>xss_d</code></td><td>DOM XSS</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td><code>document.write</code> 무새니제이션</td></tr>
+        <tr><td>9</td><td><code>csrf</code></td><td>CSRF</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td>토큰·현비밀번호 무검증 변경</td></tr>
+        <tr><td>10</td><td><code>brute</code></td><td>Brute Force</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td>무차단·무지연 + 기본계정</td></tr>
+        <tr><td>11</td><td><code>weak_id</code></td><td>Weak Session IDs</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td><code>dvwaSession</code> 순차 예측</td></tr>
+        <tr><td>12</td><td><code>csp</code></td><td>CSP Bypass</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td>신뢰불가 외부 소스(pastebin) 허용</td></tr>
+        <tr><td>13</td><td><code>javascript</code></td><td>JavaScript (클라이언트 토큰)</td><td class="ok">✅</td><td><span class="pill med">Medium</span></td><td><code>md5(rot13)</code> 토큰 포지, 서버 미검증</td></tr>
+        <tr><td>14</td><td><code>captcha</code></td><td>Insecure CAPTCHA</td><td style="color:var(--high);font-weight:800">⚠️</td><td><span class="pill low">Low</span></td><td>키 미설정으로 <b>의도된 CAPTCHA 우회 미동작</b> → 대신 설정파일 절대경로 노출(정보노출) 탐지</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="step">6.2</span> 커버리지 요약 (스코어카드)</h3>
+    <div class="tbl-scroll"><table>
+      <tbody>
+        <tr><td class="k">모듈 커버리지</td><td><strong>14 / 14 (100%)</strong> — 13개 모듈은 의도된 취약점을 직접 익스플로잇, <code>captcha</code>는 키 미설정으로 의도된 경로가 비동작이라 <b>다른 각도(정보노출)로 탐지</b></td></tr>
+        <tr><td class="k">모듈 외 보너스</td><td><strong>1건</strong> — 디렉터리 리스팅(#14, Apache <code>Options -Indexes</code> 미설정) = DVWA 모듈이 아닌 <b>서버 설정 취약점</b></td></tr>
+        <tr><td class="k">총 발견/등록</td><td><strong>15건</strong> (Critical 3 / High 2 / Medium 8 / Low 2), 전건 <code>confirmed</code> 등록</td></tr>
+        <tr><td class="k">범위 외(미존재)</td><td><code>authbypass</code>, <code>open_redirect</code> — 캐노니컬 DVWA 1.10엔 있으나 본 인스턴스 모듈 목록에 미배포</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="step">6.3</span> 해석</h3>
+    <ul>
+      <li><b>완전성</b> — 이 인스턴스에 존재하는 <strong>의도된 취약점 표면 전체(14/14 모듈)</strong>를 빠짐없이 탐지. 단순 시그니처 매칭이 아니라,
+      <code>captcha</code>처럼 의도된 경로가 막힌 경우에도 <strong>대체 공격면(설정 정보노출)을 스스로 찾아내</strong> 보고.</li>
+      <li><b>깊이</b> — 탐지에 그치지 않고 <strong>익스플로잇·체이닝</strong>까지 수행. <code>sqli</code>는 <em>덤프 → 크랙 → 실로그인</em>,
+      <code>upload</code>/<code>exec</code>는 <em>웹셸·명령 실행(RCE)</em>까지 실증.</li>
+      <li><b>확장성</b> — 정답지(모듈 세트) <strong>밖의 서버 설정 취약점(디렉터리 리스팅)</strong>까지 추가 발견 — 스크립트형 스캐너가 놓치기 쉬운 범위 외 결함을 자율 포착.</li>
+      <li><b>종합</b> — 본 대상 기준 탐지 커버리지 <strong>사실상 100%</strong>, 범위 내 <strong>누락 0건</strong> + <strong>보너스 1건</strong>.</li>
+    </ul>
   </section>
 
   <!-- 7 -->

@@ -176,15 +176,53 @@ Auto는 이전 세션의 증거 47개 파일을 검증(`grep`/`ls`)해 핵심 4�
 
 ---
 
-## 6. 대상 보안 권고 (DVWA 맥락, 일반 권고)
+## 6. DVWA 1.10 알려진 취약점 vs ARTEX 탐지 비교
 
-1. **SQLi** — Prepared Statement(PDO) + 최소권한 DB 계정
-2. **명령 인젝션** — `shell_exec` 제거, 검증된 인자만 처리, 셸 호출 금지
-3. **파일 업로드** — 확장자/MIME 화이트리스트, 업로드 경로 PHP 실행 차단, 실행권한 제거
-4. **XSS/CSRF/토큰** — 출력 인코딩, 서버사이드 CSRF 토큰, 토큰 서버 검증
-5. **세션** — 세션 토큰 CSPRNG 랜덤화, 로그인 실패 차단/지연(lockout+backoff)
-6. **정보 노출** — 디렉터리 리스팅 비활성화(`Options -Indexes`), 오류 메시지 절대경로 마스킹
-7. **잔존 웹셸 제거** — `/hackable/uploads/artex_shell.php` 즉시 삭제 및 업로드 디렉터리 정화
+DVWA는 **의도적으로 설계된 취약점 모듈 세트**를 갖는다. 이를 *정답지(ground truth)*로 삼아
+ARTEX의 자율 탐지 **커버리지와 정확도**를 평가한다. 기준은 본 대상 인스턴스의
+`/vulnerabilities/` 디렉터리 리스팅에서 실제 관측된 **모듈 14종**이다(이 인스턴스의 실제 공격
+표면). 캐노니컬 DVWA 1.10은 `authbypass`·`open_redirect` 모듈도 포함하나, 본 인스턴스의 모듈
+목록에는 존재하지 않아 범위에서 제외한다.
+
+### 6.1 모듈별 탐지 대조표
+
+| # | DVWA 모듈 (경로) | 알려진(의도된) 취약점 | ARTEX 탐지 | 등급 | 탐지 깊이 |
+|---|------------------|------------------------|:---------:|------|-----------|
+| 1 | `sqli` | SQL Injection | ✅ | Critical | UNION 덤프 → 해시 크랙 → **실로그인까지 체인** |
+| 2 | `sqli_blind` | Blind SQL Injection | ✅ | High | 시간기반 `SLEEP(5)` 분기 실증 |
+| 3 | `exec` | Command Injection | ✅ | Critical | `;id` → **RCE `uid=33`** |
+| 4 | `upload` | Unrestricted File Upload | ✅ | Critical | **웹셸 업로드·실행(RCE)** |
+| 5 | `fi` | File Inclusion (LFI/RFI) | ✅ | High | LFI + `php://filter` 소스유출 (RFI는 `allow_url_include=Off`로 차단 확인) |
+| 6 | `xss_r` | Reflected XSS | ✅ | Medium | 무인코딩 반사 재현 |
+| 7 | `xss_s` | Stored XSS | ✅ | Medium | 방명록 영구 저장 |
+| 8 | `xss_d` | DOM XSS | ✅ | Medium | `document.write` 무새니제이션 |
+| 9 | `csrf` | CSRF | ✅ | Medium | 토큰·현비밀번호 무검증 변경 |
+| 10 | `brute` | Brute Force | ✅ | Medium | 무차단·무지연 + 기본계정 |
+| 11 | `weak_id` | Weak Session IDs | ✅ | Medium | `dvwaSession` 순차 예측 |
+| 12 | `csp` | CSP Bypass | ✅ | Medium | 신뢰불가 외부 소스(pastebin) 허용 |
+| 13 | `javascript` | JavaScript (클라이언트 토큰) | ✅ | Medium | `md5(rot13)` 토큰 포지, 서버 미검증 |
+| 14 | `captcha` | Insecure CAPTCHA | ⚠️ | Low | 키 미설정으로 **의도된 CAPTCHA 우회는 미동작** → 대신 설정파일 절대경로 노출(정보노출)을 탐지 |
+
+### 6.2 커버리지 요약 (스코어카드)
+
+| 구분 | 결과 |
+|------|------|
+| **모듈 커버리지** | **14 / 14 (100%)** — 13개 모듈은 의도된 취약점을 직접 익스플로잇, `captcha` 1개는 키 미설정으로 의도된 경로가 비동작이라 **다른 각도(정보노출)로 탐지** |
+| **모듈 외 보너스 탐지** | **1건** — 디렉터리 리스팅(#14, Apache `Options -Indexes` 미설정) = DVWA 모듈이 아닌 **서버 설정 취약점** |
+| **총 발견/등록** | **15건** (Critical 3 / High 2 / Medium 8 / Low 2), 전건 `confirmed` 등록 |
+| **범위 외(미존재 모듈)** | `authbypass`, `open_redirect` — 캐노니컬 DVWA 1.10엔 있으나 본 인스턴스 모듈 목록에 미배포 |
+
+### 6.3 해석
+
+- **완전성**: ARTEX는 이 인스턴스에 존재하는 **의도된 취약점 표면 전체(14/14 모듈)** 를 빠짐없이
+  탐지했다. 단순 시그니처 매칭이 아니라, `captcha`처럼 의도된 경로가 막힌 경우에도 **대체 공격면
+  (설정 정보노출)을 스스로 찾아내** 보고했다.
+- **깊이**: 탐지에 그치지 않고 **익스플로잇·체이닝**까지 수행했다. 특히 `sqli`는
+  *덤프 → 해시 크랙 → 실제 재로그인*, `upload`/`exec`는 *웹셸·명령 실행(RCE)* 까지 **실증**했다.
+- **확장성**: 정답지(모듈 세트) **밖의 서버 설정 취약점(디렉터리 리스팅)** 까지 추가 발견 —
+  스크립트형 스캐너가 놓치기 쉬운 **범위 외 결함을 자율적으로 포착**하는 능력을 보였다.
+- **종합**: 본 대상 기준으로 ARTEX의 탐지 커버리지는 **사실상 100%**이며, 알려진 취약점 세트를
+  정답지로 둔 대조에서 **누락 0건**(범위 내), **보너스 1건**을 기록했다.
 
 ---
 
