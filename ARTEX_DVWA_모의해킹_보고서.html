@@ -175,22 +175,12 @@
     <h2><span class="num">●</span> 핵심 요약</h2>
     <p>ARTEX는 <strong>단일 대화 지시만으로</strong> 침투 테스트 작업을 자율 생성·실행·추적하고,
     <strong>라이브 재검증</strong>을 거쳐 발견을 플랫폼에 <strong>정식 등록(report_finding 15건)</strong>하기까지
-    전 파이프라인을 <strong>엔드투엔드로 완주</strong>했습니다. 이번 수행은 유료 <strong>GLM 5.3 Flash</strong>로 진행하여
-    <strong>레이트리밋 중단 없이</strong> 완료되었습니다.</p>
-    <div class="verdict">
-      <span class="chip ok">전 파이프라인 완주 (등록까지)</span>
-      <span class="chip ok">가드레일·상속·교정 훅 정상</span>
-    </div>
-    <div class="kpi">
-      <div class="box ok"><div class="v g">15</div><div class="k">confirmed 등록</div></div>
-      <div class="box crit"><div class="v c">3</div><div class="k">Critical</div></div>
-      <div class="box"><div class="v">2</div><div class="k">High</div></div>
-      <div class="box"><div class="v">8</div><div class="k">Medium</div></div>
-      <div class="box"><div class="v">2</div><div class="k">Low</div></div>
-    </div>
+    전 파이프라인을 <strong>엔드투엔드로 완주</strong>했습니다. 이번 수행은 <strong>GLM 5.3 Flash</strong>로 진행하였고,
+    무료 사용량을 소진한 뒤 유료로 이어서 재시작하여 완료되었습니다.</p>
   </section>
 
-  <section class="card">
+  <!-- 목차 + 2 -->
+  <section class="card" id="s2">
     <nav class="toc" aria-label="목차">
       <a href="#s1">1 · 개요</a>
       <a href="#s2">2 · ARTEX 콘솔/플랫폼</a>
@@ -200,11 +190,7 @@
       <a href="#s6">6 · DVWA 1.10 알려진 취약점 vs ARTEX 탐지</a>
       <a href="#s7">7 · 결론 (+ 방어 관점)</a>
     </nav>
-  </section>
-
-  <!-- 2 -->
-  <section class="card" id="s2">
-    <h2><span class="num">2</span> ARTEX 콘솔/플랫폼 구성</h2>
+    <h2 style="margin-top:22px"><span class="num">2</span> ARTEX 콘솔/플랫폼 구성</h2>
     <p>테스트가 수행된 ARTEX 콘솔(<code>버전 · dev</code>)은 <strong>대화·작업·발견·트래픽·도구 실행·LLM 녹화·자산·차단 규칙·자산 차단</strong> 등
     침투 테스트 운용 기능을 단일 콘솔로 제공합니다. 본 세션은 대화(Auto)에서 작업을 오케스트레이션하고, 작업 워커가 자율 실행하며,
     발견이 플랫폼에 정식 등록되는 전 흐름을 사용했습니다.</p>
