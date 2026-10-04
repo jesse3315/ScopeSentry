@@ -422,7 +422,7 @@ async function handleSubmit() {
     :maxHeight="430"
   >
     <ElText type="danger" size="small" style="position: relative; left: 1rem"
-      >*更新目前只支持docker容器搭建的程序，输入的url地址确保docker内可访问，节点最新版在github中releases的linux版本</ElText
+      >*업데이트는 현재 Docker 컨테이너로 구축된 프로그램만 지원합니다. 입력한 URL이 Docker 내부에서 접근 가능한지 확인하세요. 노드 최신 버전은 GitHub Releases의 Linux 버전입니다</ElText
     >
     <ElForm :model="form" label-width="120px" class="upload-form">
       <ElFormItem label="server url">
@@ -450,7 +450,7 @@ async function handleSubmit() {
       <el-tooltip class="item" effect="dark" :content="t('plugin.keyMsg')" placement="top">
         <ElInput v-model="pluginKey" />
       </el-tooltip>
-      <BaseButton @click="savePluginKey" type="primary" class="w-full">确定</BaseButton>
+      <BaseButton @click="savePluginKey" type="primary" class="w-full">확인</BaseButton>
     </div>
   </Dialog>
 </template>

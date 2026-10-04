@@ -403,7 +403,7 @@ export default defineComponent({
                 })
               }}
             >
-              预览
+              미리보기
             </BaseButton>
           )}
         </div>
@@ -538,7 +538,7 @@ export default defineComponent({
                 })
               ) : (
                 <div class="flex flex-1 justify-center">
-                  <ElEmpty description="暂无数据" />
+                  <ElEmpty description="데이터가 없습니다" />
                 </div>
               )}
             </div>

@@ -2,7 +2,7 @@
 	<img src="docs/images/favicon.ico"/>
 </div>
 
-English | [中文](./README_CN.md)
+English | [中文](./README_CN.md) | [한국어](./README_KO.md)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Autumn-27/ScopeSentry-Scan)
 
