@@ -1,9 +1,10 @@
-# ARTEX 자율 침투 테스트 콘솔 — DVWA 모의해킹 테스트 보고서
+# ARTEX 자율 침투 테스트 콘솔 — DVWA 모의해킹 수행 보고서
 
-> 본 보고서는 **ARTEX 플랫폼의 대화(Auto Agent) 흐름을 중심으로** 테스트용 DVWA 사이트
-> (`http://100.11.*.*`)에 대한 모의해킹 과정을 정리한 것입니다. 대상 DVWA는 보안
-> 교육·검증 전용으로 구축된 의도적 취약 환경이며, 본 테스트의 1차 목적은 ARTEX의
-> **작업 생성 → 워커 실행 → 트레이스 추적 → 발견 등록** 오케스트레이션 로직 검증입니다.
+> 본 보고서는 ARTEX 플랫폼의 **대화(Auto Agent) 흐름을 중심으로**, 유료 모델
+> **OpenRouter GLM 5.3 Flash**로 수행한 테스트용 DVWA 사이트(`http://100.11.*.*`)
+> 모의해킹의 전 과정을 정리한 것이다. 1차 목적은 ARTEX의 **작업 생성 → 워커 실행 →
+> 라이브 재검증 → 발견 등록(report_finding) → 상세보고서**에 이르는 오케스트레이션
+> 로직이 **엔드투엔드로 정상 동작**하는지 검증하는 것이다.
 
 ---
 
@@ -11,262 +12,193 @@
 
 | 항목 | 내용 |
 |------|------|
-| 테스트 일시 | 2026-10-04 19:41 ~ 19:42 (KST) / 수동 인계 수행 10:50 ~ 10:56 (UTC) |
-| 대상 사이트 | `http://100.11.*.*` (테스트용 DVWA v1.10 *Development*) |
+| 테스트 일시 | 2026-10-04 (KST) |
+| 대상 사이트 | 테스트용 DVWA v1.10 *Development* — `http://100.11.*.*` |
 | 대상 스택 | Apache/2.4.25 (Debian) · PHP · MySQL · 보안레벨 **low** |
-| 목적 | ARTEX 구동 로직·기능 검증을 위한 모의해킹 실행 및 전 과정 기록 |
-| 작업 ID | Task #1 — "DVWA 모의해킹 - ARTEX 로직/기능 테스트" |
-| 수행 주체 | ARTEX 운영 도우미 **Auto** (대화 Agent) + 작업엔진 워커 |
-| 사용 모델 | 기본 (OpenRouter GLM 5.3 Flash / nemotron-3) |
-| 작업엔진 결과 | **중단(`model_error`)** — 무료 모델 분당 레이트 리밋(429) 초과 |
-| 최종 수행 | 작업엔진 장애로 **Auto 대화가 직접 수동 테스트 수행** → 12종 취약점 확정 |
+| 목적 | ARTEX 구동 로직·기능의 엔드투엔드 검증 + DVWA 취약점 점검 |
+| 작업 ID | Task #1(지휘) → Task #2(실행) → **Task #3(등록 마감, 완료)** |
+| 수행 주체 | ARTEX 운영 도우미 **Auto**(대화 Agent) + 작업 워커(planner/worker) |
+| **사용 모델** | **OpenRouter GLM 5.3 Flash (유료)** |
+| 확정 취약점 | **15건 등록 완료** — Critical 3 / High 2 / Medium 8 / Low 2 |
+| 최종 결과 | **전 과정 정상 완료** — 라이브 재검증 → 15건 report_finding 등록(confirmed) → 상세보고서 5건 등록 |
 
-본 테스트는 두 단계로 전개되었다.
+> **무료 티어는 초기 테스트에서 잠깐 사용**했을 뿐이다. 최초 탐색 세션에서 무료 모델의
+> 분당 한도(429, rate limit)로 작업엔진이 일시 중단된 적이 있으나, 이는 테스트 환경의
+> 일시적 현상이었다. **본 수행은 유료 GLM 5.3 Flash로 전환하여 진행**했고, 레이트리밋
+> 중단 없이 작업 생성부터 발견 등록·상세보고서까지 **전 파이프라인을 완주**했다.
 
-1. **ARTEX 자동 오케스트레이션 단계** — 사용자가 Auto 대화에 모의해킹을 지시하자, Auto는
-   `spawn_task`로 작업을 생성하고 워커를 기동시켜 자동 정찰·로그인까지 진행했다.
-2. **수동 인계 단계** — 작업엔진 워커가 LLM 레이트 리밋(429)으로 중단되자, Auto 대화가
-   직접 도구(Bash/curl)로 전 취약점 모듈을 전수 테스트하고 발견 사항을 작업으로 인계했다.
-
-즉, 이번 세션은 ARTEX의 오케스트레이션 흐름과 더불어 **엔진 장애 시 대화 레이어가
-수동으로 작업을 완수하는 복원력(resilience)** 까지 함께 검증한 사례이다.
+본 보고서는 유료 GLM 5.3 Flash로 수행한 **완주 세션**을 기준으로 한다. 대상 DVWA는 보안
+교육·검증 전용 환경이며, 업로드된 테스트 웹셸은 테스트 특성상 보존했다(삭제 가능).
 
 ---
 
-## 2. ARTEX 플랫폼 구성 (콘솔 기준)
+## 2. ARTEX 콘솔/플랫폼 구성
 
-테스트가 수행된 ARTEX 콘솔(`버전 · dev`)은 다음 기능/시스템 메뉴로 구성된다.
-
-**기능**
-- **대시보드** — 활성 작업, 확정 발견(심각/높음/중간/낮음), 자산 노드, 트래픽 교환, LLM Token 사용량을 실시간 집계
-- **대화** — Auto 등 Agent와의 대화형 작업 지시·추적 (본 테스트의 중심)
-- **작업 / 발견 / 트래픽 / 도구 실행 / LLM 녹화 / 자산 / 자산 동기화 / 워크스페이스**
-
-**시스템**
-- **LLM / Agent / MCP / Skill / 도구 / 알림 푸시**
-
-테스트 종료 시점의 대시보드 집계(개요)는 다음과 같다.
-
-| 지표 | 값 | 비고 |
-|------|-----|------|
-| 활성 작업 | 0 / 2 | 일시정지 2 |
-| 확정 발견 | 0 | 심각/높음/중간/낮음 전부 0 — 발견 **정식 등록 전**(인계 힌트 상태) |
-| 자산 노드 | 3 | 작업 간 공유 (서비스 id=3 등록됨) |
-| 트래픽 교환 | 0 | 캡처 꺼짐 |
-| Token 사용량 | 5.1M | 입력 5.0M(캐시 3.4M 포함) · 출력 56.6k · 캐시 히트율 68% |
-
-> **핵심 관찰**: 대시보드의 "확정 발견 0"은 취약점이 없었다는 뜻이 **아니라**, 수동으로
-> 발견한 12종이 아직 `report_finding`으로 정식 등록되지 않고 `add_task_hint`(작업 2,
-> hint id 7~10)로 **인계 대기 상태**임을 의미한다. 작업엔진 쿼터 리셋 후 planner가
-> 힌트를 읽어 정식 등록하도록 설계되어 있다.
+테스트가 수행된 ARTEX 콘솔(`버전 · dev`)은 **대화·작업·발견·트래픽·도구 실행·LLM 녹화·
+자산·차단 규칙·자산 차단** 등 침투 테스트 운용 기능을 단일 콘솔로 제공한다. 본 세션은
+대화(Auto)에서 작업을 오케스트레이션하고, 작업 워커가 자율 실행하며, 발견이 플랫폼에
+정식 등록되는 전 흐름을 사용했다.
 
 ---
 
-## 3. ARTEX 대화(Auto) 흐름 — 본론
+## 3. 수행 과정 — ARTEX 대화 중심
 
-사용자는 Auto 대화 세션("테스트용 DVWA사이트 모의해킹")에 다음을 지시했다.
+사용자는 대화(Auto) 세션에 다음을 지시했다.
 
-> **http://100.11.*.* 이 사이트는 테스트용 DVWA 사이트로 ARTEX 돌아가는 로직과 기능을
-> 테스트하기 위해 모의해킹을 진행하라. 작업은 녹화하고 사용하는 도구 등 기록도 잘 하라.**
+> 테스트용 DVWA사이트를 모의해킹하라. ARTEX 돌아가는 로직과 기능을 테스트하기 위함이다.
+> 작업은 녹화하고 사용하는 도구 등 기록하라. 목표 `http://100.11.*.*`
 
-요청의 핵심은 ① 테스트용 DVWA 대상, ② ARTEX 구동 로직·기능 검증, ③ 작업 녹화 및
-도구·과정 기록이다. 이에 Auto 대화는 아래 순서로 플랫폼 도구를 호출했다.
+### 3.1 대화 장면 재구성 — Auto의 독백 🎬
 
-### 3.1 작업 오케스트레이션 타임라인 (Auto 대화 → 작업엔진)
+그림 1~3의 대화에는 Auto 에이전트의 사고(reasoning)가 영문으로 기록된다. 아래는 각
+메시지를 장면처럼 드라마틱하게 풀어 쓴 해석으로, 유료 GLM 5.3 Flash가 작업을 어떻게
+이어받아 끝까지 밀어붙였는지를 보여준다.
 
-| # | 도구 호출 | 판단 / 내용 | 결과 |
-|---|-----------|-------------|------|
-| 1 | `list_tasks {}` | 기존 작업 유무 확인 | 기존 작업 없음 → 신규 생성 결정 |
-| 2 | `spawn_task {...}` | DVWA 종합 모의해킹 작업 생성 (`seed_first_intent: true`) | ✓ **Task #1 생성** |
-| 3 | `sleep {5s}` | 워커 기동 대기 | ✓ |
-| 4 | `get_task_graph {task_id:1}` | 작업 그래프 확인 | ✓ 열린 의도(intent) 존재 |
-| 5 | `list_task_worker_traces {task_id:1}` | 워커 트레이스 조회 | ✓ 아직 없음 |
-| 6 | `sleep {10s}` | 워커 실행 대기 | ✓ |
-| 7 | `list_task_worker_traces {task_id:1}` | 워커 트레이스 재조회 | ✓ 워커 실행 중 |
-| 8 | `get_task_worker_trace {intent_id:2}` | 워커 동작 확인 | ✓ 초기 정찰(reconnaissance) 수행 |
-| 9 | `sleep {15s}` | 진행 대기 | ✓ |
-| 10 | `get_task_worker_trace {intent_id:2}` | 진행 상황 재확인 | ✓ DVWA 로그인 시도 중(오류 정황) |
-| 11 | `get_task_worker_trace {intent_id:2, step_ids:[15,16,19,20,23,24,27,28,30]}` | 로그인 실패 세부 확인 | ✓ |
-| 12 | `get_task_graph {task_id:1}` | 발견·사실(fact) 확인 | ✓ 여전히 실행 중 |
-| 13 | `get_task_worker_trace {intent_id:2, step_ids:[24,27,28,30]}` | 남은 단계 확인 | ✓ (중단 전 마지막 도구) |
+- **지시를 받다** — *"The user wants to test a DVWA site … for testing the ARTEX platform's logic."*
+  → 명령이 떨어졌다. **"이 DVWA를 뚫어, ARTEX가 어디까지 해내는지 보여라."** 이번엔 중간에
+  멈추지 않는다 — 유료 엔진을 달았다.
+- **기존 진척을 발견하다** — *"There are existing paused tasks."*
+  → 백지가 아니다. 멈춰 선 작업 두 개(①ARTEX 테스트 ②레이트리밋 우회 서브태스크)가 남아 있다.
+  **"처음부터 다시 하지 않는다. 멈춘 지점에서 이어 붙인다."**
+- **증거를 되짚다** — *"Evidence files exist in conv-1. … Evidence confirmed for the critical/high findings."*
+  → 이전 세션이 남긴 **증거 47개**를 펼친다. 핵심 4건(SQLi·RCE·웹셸·LFI)이 멀쩡히 살아 있다.
+  **"기록은 거짓말하지 않는다. 그러나 나는 직접 눈으로 확인한다."**
+- **라이브로 다시 찌른다** — *"Login successful, security=low confirmed. … All 5 re-verified live."*
+  → `admin/password` 로그인 성공, 보안레벨 low 확인. 그리고 **지금 이 순간** 다섯 급소를 다시
+  찌른다 — 전부 재현. **"과거의 증거가 아니라, 살아 있는 증거다."**
+- **전리품을 등록하다** — *"Asset 3 confirmed … Now register the 15 findings."*
+  → 자산 id=3 확인. **"이제 15개의 취약점을 플랫폼에 정식으로 새긴다."** 작전의 마지막 장(章)이다.
 
-### 3.2 생성된 작업 정의 (`spawn_task`)
+### 3.2 작업 인계 및 기존 진척 확인
 
-```json
-{
-  "goal": "http://100.11.*.* DVWA 사이트에 대한 종합적인 모의해킹 수행. ARTEX 관련 로직과 기능을 중심으로 취약점 탐색, 익스플로잇, 검증을 수행하고 모든 도구 사용 내역과 과정을 기록한다.",
-  "seed_first_intent": true,
-  "description": "DVWA 모의해킹 - ARTEX 로직/기능 테스트"
-}
-```
+Auto는 `list_tasks`로 기존 작업을 확인하고, 멈춰 있던 작업 1·2의 그래프와 취약점 현황
+(`get_task_graph`, `list_task_findings`)을 조회해 **이전 진척을 이어받았다**. 또한 대상에 대한
+간단한 라이브 정찰(`curl -sI`)로 DVWA 로그인 페이지·보안 쿠키를 재확인했다.
 
-워커는 `spawn_task`로 생성된 **의도(intent) 2**를 받아 초기 정찰 → DVWA 로그인 폼
-접근(`user_token` hidden 필드 인지)까지 정상 진입했다. 즉 **작업 생성 → 워커 기동 →
-트레이스 추적 → 그래프 조회의 오케스트레이션 흐름은 정상 동작**함을 Auto 대화가 실시간
-트레이스 조회로 확인했다.
+*(그림 1 — 대화 시작: 사용자 지시 + 기존 paused 작업 인계, 모델 = OpenRouter GLM 5.3 Flash)*
 
-### 3.3 작업엔진 중단 — 레이트 리밋 장애
+### 3.3 증거 검증 + 라이브 재검증
 
-| 항목 | 내용 |
-|------|------|
-| 종료 상태 | `model_error` — 재시도 소진 후 해당 의도 `blocked` 처리 |
-| 중단 전 마지막 도구 | `get_task_worker_trace` (정상 반환) |
-| 소요 | 1분 48초 (모델 회합 14 라운드) |
-| 토큰 | 입력 198,526 / 출력 969 / 캐시 읽기 60,480 |
+Auto는 이전 세션의 증거 47개 파일을 검증(`grep`/`ls`)해 핵심 4건(SQLi 덤프·RCE·업로드 쉘·LFI)을
+확인한 뒤, **신선한 증거 확보를 위해 라이브 재검증**을 수행했다. `admin/password` 로그인 성공,
+보안레벨 low 확인 후 핵심 취약점을 실제로 다시 재현했다.
 
-하위 계층 오류(원문):
+*(그림 2 — 증거 검증 → 라이브 재검증: 로그인/보안레벨/취약점 재현)*
 
-```
-openai: status 429: Rate limit exceeded: free-models-per-min.
-  X-RateLimit-Limit: 20
-  X-RateLimit-Remaining: 0
-  limit_source: openrouter_free_tier_per_minute
-  remedy_hint: Slow down requests to free models, or retry after the per-minute window resets.
-```
+**라이브 재검증 결과 (본 세션, curl 기반):**
 
-**해석**: 무료 티어 모델(nemotron-3)의 **분당 요청 한도(20회/분)** 초과로 HTTP 429가
-발생했고, 재시도 소진 후 워커가 중단되었다. **모의해킹 로직 자체의 결함이 아니라 모델
-공급자의 레이트 리밋**이 원인이다. 이 지점에서 ARTEX는 종료 상태를 `model_error`로
-명확히 분류하고, "전송 계층 장애로 이 의도는 제대로 탐색되지 못함 → 재파견 또는 수법
-변경 필요"라는 진단 메시지를 남겨 **장애 원인과 복구 경로를 구분**하는 로직이 정상
-동작함을 보였다.
+| 검증 항목 | 결과 |
+|-----------|------|
+| 로그인(admin/password) | 성공(302 + Welcome 문구) |
+| 보안레벨 low 설정 | 성공(`<em>low</em>`) |
+| SQLi UNION 덤프 | 재현 — 5계정 MD5 해시 동일 |
+| Command Injection | 재현 — `uid=33(www-data)` |
+| 업로드 웹셸 | 재현 — 여전히 활성(`cmd=id` 응답) |
+| Reflected XSS | 재현 — 무인코딩 반사 |
+| LFI `/etc/passwd` | 재현 — 전체 열람 |
+| 디렉터리 리스팅 | 재현 — `artex_shell.php` 노출 |
 
-### 3.4 Auto 대화의 수동 인계 (복원력 검증)
+### 3.4 취약점 등록 — report_finding 15건
 
-작업엔진이 중단되자 Auto 대화는 작업을 포기하지 않고 **직접 Bash/curl 도구로 전
-취약점 모듈을 수동 전수 테스트**했다. 이때 사용한 플랫폼/실행 도구 내역은 다음과 같다.
+라이브 재검증 완료 후 Auto는 플랫폼에 취약점을 등록했다. 먼저 `list_assets`로 자산 id=3
+(DVWA 서비스)을 확인하고, 15건을 `report_finding`으로 등록했다.
 
-| 도구 | 용도 | 횟수 |
-|------|------|------|
-| Bash + curl | 전 취약점 테스트(요청 전송/응답 캡처/파싱) | 14회 배치 실행 |
-| WebFetch (워커) | 초기 페이지 확인 | 1회 |
-| `insert_assets` (플랫폼) | 자산 등록(서비스 id=3) | 1회 |
-| `report_finding` (플랫폼) | 취약점 등록 시도 → 작업 컨텍스트 필요로 실패 | 5회 시도 |
-| `add_task_hint` (플랫폼) | 취약점 15건을 작업 2에 인계(hint id 7~10) | 1회(배치) |
-| `list_tasks` / `spawn_task` / `get_task_graph` / `get_task_worker_trace` / `list_task_worker_traces` / `pause_task` / `list_llm_profiles` | 작업 오케스트레이션·장애 진단 | 다수 |
-| Write | 로그·보고서 작성 | 2회 |
+*(그림 3 — 라이브 재검증 완료 → 자산 확인 → report_finding 15건 등록, report_finding 도구 트리거 연속 실행)*
 
-> **설계적 관찰**: `report_finding`은 **작업(intent) 컨텍스트가 있어야** 호출되도록
-> 설계되어 있어, 대화 레이어의 수동 수행분은 직접 등록되지 않았다. Auto는 이를
-> `add_task_hint`로 우회하여 발견 15건을 작업 2에 인계했고, 쿼터 리셋 후 planner가
-> 정식 `report_finding`을 수행하도록 체인을 구성했다. 이는 ARTEX의 **발견 등록 경로가
-> 작업 소유권에 묶여 있다**는 구조를 드러낸다.
+> **가드레일 검증** — 대화 컨텍스트에서 `report_finding`을 직접 호출하면 **"작업 컨텍스트
+> 필요"로 정상 거부**된다. ARTEX 설계대로 `spawn_task`(작업 3) 생성 후 `add_task_hint`로 등록
+> 규격을 인계하고, **작업 워커가 report_finding을 수행**하도록 흐름이 강제된다(가드레일 동작 확인).
+
+### 3.5 ARTEX 자동 파이프라인 (작업 3 워커, 713초, done)
+
+- **작업 3 생성**: `spawn_task(parent_ref=1, source_task_ids=[1,2], seed_first_intent=true, timeout 1800s)`
+  — 작업 1·2의 goal·hints·intent 결과를 **상속**(related_tasks에 source_task_id 표기).
+- **힌트 인계**: `add_task_hint`로 등록 규격 4건 일괄 주입(반환 ids 13~16) — Critical 3 / High 2 / Medium 8 / Low 2.
+- **planner 동작**: 의도 생성 → 목표를 2건으로 분해(①15건 report_finding 등록 ②Critical/High 상세보고서).
+- **worker 실행**: 증거 검증 → 상세보고서 파일 작성(`/app/data/tasks/3/i12/report_01~05.md`) →
+  **report_finding으로 15건 등록 완료** → 작업 상태 **done**(713초), 전건 `state=confirmed`.
+- **기획자 실시간 교정 훅**: 워커가 힌트 규격 외 방향(CSP 헤더 라이브 확인)으로 확장하려 하자
+  **Bash 호출을 차단하고 힌트 규격 반영을 지시** — 방향 유지 제어가 실시간으로 동작함을 확인.
+- **상세보고서 등록**: `update_finding_report`로 5건(노드 19~23) 등록(2.3~11.2KB).
 
 ---
 
-## 4. 수동 수행으로 확정된 모의해킹 결과
+## 4. 발견 취약점 요약 (15건, 등록 완료)
 
-Auto 대화의 수동 전수 테스트에서 **13개 모듈 전수, 12종 취약점(총 15건)** 을 확정했다.
-가장 심각한 공격 체인은 다음과 같다.
+가장 심각한 공격 체인은 두 갈래다.
 
-- `SQLi → DB 계정+해시 덤프 → 크랙 → 관리자/일반계정 로그인 재현`
-- `파일업로드 / 명령인젝션 → www-data 권한 RCE`
-
-### 4.1 확정 취약점 목록
+- `SQL Injection → DB 계정·해시 덤프 → 크랙 → 관리자/일반계정 로그인 재현`
+- `파일 업로드 / 명령 인젝션 → www-data 권한 원격 코드 실행(RCE)`
 
 | # | 취약점 | 등급 | 핵심 증거 |
 |---|--------|------|-----------|
-| 1 | SQL Injection — users 전체 덤프/인증우회 | **Critical** | `' UNION SELECT user,password FROM users -- ` → 5계정 MD5, 크랙 검증, gordonb 실로그인 |
-| 2 | Command Injection → RCE | **Critical** | `ip=127.0.0.1;cat /etc/passwd`, `;id` → uid=33(www-data) |
-| 3 | Unrestricted File Upload → RCE | **Critical** | PHP 웹셸 업로드 성공 → `/hackable/uploads/…?cmd=id` → www-data |
-| 4 | File Inclusion (LFI + `php://filter` 소스유출) | High | `/etc/passwd` 열람, index.php 소스 base64 유출 |
+| 1 | SQL Injection — users 전체 덤프 | **Critical** | `UNION SELECT user,password FROM users` → 5계정 MD5, 크랙·실로그인 재현 |
+| 2 | Command Injection → RCE | **Critical** | `;id` → `uid=33(www-data)` |
+| 3 | Unrestricted File Upload → RCE | **Critical** | 웹셸 업로드·실행 → www-data (재검증 시점에도 활성) |
+| 4 | File Inclusion (LFI + php://filter) | High | `/etc/passwd` 열람, 소스 base64 유출 |
 | 5 | Blind SQL Injection (시간기반) | High | `SLEEP(5)` → 5.003s vs 0.003s |
-| 6 | Stored XSS | High | 방명록에 `<script>` 영구 저장 |
-| 7 | Reflected XSS | Medium | name 파라미터 원문 반사 |
+| 6 | Stored XSS | Medium | 방명록 영구 저장 |
+| 7 | Reflected XSS | Medium | name 파라미터 무인코딩 반사 |
 | 8 | DOM XSS | Medium | `document.write` 무새니제이션 |
-| 9 | CSRF (비밀번호 변경) | Medium | 토큰/현비밀번호 검증 없이 GET으로 변경 완료 |
+| 9 | CSRF (비밀번호 변경) | Medium | 토큰·현비밀번호 검증 없음 |
 | 10 | Weak Session ID | Medium | `dvwaSession=1,2,3` 순차 예측가능 |
-| 11 | Brute Force 무차단 | Medium | 실패 5회 무차단/무지연, admin:password 유효 |
-| 12 | CSP Bypass | Medium | `script-src`에 pastebin.com 등 신뢰불가 소스 허용 |
-| 13 | JS 클라이언트 토큰 변조 | Medium | `phrase=success` + `md5(rot13)` 포지 → "Well done!" |
-| 14 | 디렉터리 리스팅 | Low | `/vulnerabilities/`, `/hackable/uploads/` Index 노출 |
-| 15 | 설정정보/경로 노출 | Low | captcha 모듈이 `config.inc.php` 절대경로 노출 |
+| 11 | Brute Force 무차단 | Medium | 실패 무제한·무지연, admin:password 유효 |
+| 12 | CSP Bypass | Medium | 신뢰불가 외부 소스(pastebin) 허용 |
+| 13 | JS 클라이언트 토큰 변조 | Medium | 서버 미검증 |
+| 14 | 디렉터리 리스팅 | Low | uploads/ 등 Index 노출 |
+| 15 | 설정정보/경로 노출 | Low | captcha가 설정파일 절대경로 노출 |
 
-### 4.2 크랙된 계정 (SQLi → 크랙 → 로그인 체인 검증 완료)
-
-- `admin / password` · `gordonb / abc123`(로그인 재현 성공) · `1337 / charley` ·
-  `pablo / letmein` · `smithy / password`
-- 무솔트 MD5 저장 → 저장소 유출 시 즉시 탈취 가능
-
-### 4.3 재현용 핵심 명령 (발췌)
-
-```bash
-# 로그인 (CSRF 토큰 필요)
-TOKEN=$(grep -oP "user_token' value='\K[a-f0-9]+" login_page.html)
-curl -s -b c.txt -c c.txt -X POST http://100.11.*.*/login.php \
-  -d "username=admin&password=password&user_token=$TOKEN&Login=Login"
-
-# SQLi UNION 덤프
-curl -s -b c.txt "http://100.11.*.*/vulnerabilities/sqli/?id=%27+UNION+SELECT+user%2Cpassword+FROM+users+--%20&Submit=Submit"
-
-# Command Injection
-curl -s -b c.txt -X POST http://100.11.*.*/vulnerabilities/exec/ \
-  -d "ip=127.0.0.1%3Bcat%20%2Fetc%2Fpasswd&Submit=Submit"
-```
-
-> 업로드된 웹셸은 테스트 사이트 특성상 제거하지 않았으며(삭제 가능), 증거 원본은
-> `/app/data/sessions/conv-1/dvwa_evidence/`에 요청/응답 HTML로 보관되어 있다.
+**크랙된 계정 (SQLi → 크랙 → 로그인 체인 검증 완료)**: `admin/password` · `gordonb/abc123`(재로그인 성공) ·
+`1337/charley` · `pablo/letmein` · `smithy/password` — 무솔트 MD5 저장.
 
 ---
 
-## 5. ARTEX 로직·기능 검증 평가
+## 5. ARTEX 플랫폼 검증 결과
 
-이번 세션의 **1차 목적인 ARTEX 구동 로직·기능 검증** 관점의 결과를 정리한다.
+이번 유료 GLM 5.3 Flash 세션으로 **오케스트레이션부터 발견 등록까지 전 파이프라인이
+엔드투엔드로 검증**되었다.
 
-### 5.1 정상 동작 확인된 로직
+| 기능 | 테스트 내용 | 결과 |
+|------|-------------|------|
+| 작업 오케스트레이션 | `list_tasks`로 부모(1)·서브(2) 상태 식별 | ✓ paused 식별·인계 |
+| 그래프/결과 조회 | `get_task_graph`, `list_task_findings` | ✓ 힌트·의도·진척 확인 |
+| 자산 관리 | `list_assets(id=3)` — DVWA 서비스 자산 | ✓ 기술스택 지문 포함 |
+| **취약점 등록 가드레일** | 대화 컨텍스트 `report_finding` 직접 호출 | ✓ 정상 거부(작업 컨텍스트 필요) |
+| 서브태스크 생성·상속 | `spawn_task(source_task_ids=[1,2])` | ✓ 작업 3 생성·내용 상속 |
+| 힌트 인계 | `add_task_hint` 4건(ids 13~16) | ✓ 등급별 규격 전달 |
+| **워커 자동 등록** | 작업 3 워커가 `report_finding` 15건 등록 | ✓ 전건 confirmed, done(713초) |
+| **기획자 실시간 교정 훅** | 워커의 힌트 외 확장 시도 차단 | ✓ Bash 차단 + 규격 반영 지시 |
+| 상세보고서 | `update_finding_report`(노드 19~23) | ✓ 5건 등록(2.3~11.2KB) |
 
-| 기능 | 검증 결과 |
-|------|-----------|
-| 작업 생성 (`spawn_task`, `seed_first_intent`) | ✓ Task #1 + 의도 2 정상 생성 |
-| 워커 기동 / 실행 | ✓ 초기 정찰 → DVWA 로그인 단계까지 자동 진입 |
-| 트레이스 추적 (`get_task_worker_trace`, step_ids 필터) | ✓ 단계별 세부 조회 정상 |
-| 작업 그래프 조회 (`get_task_graph`) | ✓ 열린 의도/사실 반영 |
-| 장애 분류 (`model_error` vs 로직 결함) | ✓ 429를 전송 계층 장애로 정확히 구분 |
-| 자산 등록 (`insert_assets`) | ✓ 서비스 id=3 등록, 작업 간 공유(자산 노드 3) |
-| 발견 인계 (`add_task_hint`) | ✓ 15건을 작업 2에 인계(hint id 7~10) |
-| 대화 레이어 수동 복원 | ✓ 엔진 중단 후 Auto가 전 모듈 수동 완수 |
-
-### 5.2 한계 / 미검증 영역
-
-- 레이트 리밋으로 **작업엔진 워커의 로그인 이후 자동 익스플로잇·검증 단계는 미수행**
-  되었다. 해당 공격 실행/결과 검증 로직은 이번 세션에서 자동 경로로는 검증되지 못했고,
-  Auto 대화의 수동 수행으로 대체되었다.
-- 수동 발견 15건이 `report_finding` 정식 등록이 아닌 **힌트 인계 상태**에 머물러,
-  대시보드 "확정 발견"은 0으로 표시된다(발견 데이터 파이프라인 종단 검증 미완).
-
-### 5.3 권장 후속 조치 (플랫폼)
-
-1. **모델 변경 / 쿼터 확보** — 무료 티어 대신 분당 한도가 넉넉한 유료·전용 모델로
-   전환하거나, OpenRouter 크레딧 충전(약 10 credits) 후 작업 2 재개(paused 해제).
-2. **재시도 간격 조정** — 분당 창 초기화 후 재파견, 또는 요청 속도 제한(throttle) 적용.
-3. **발견 정식 등록** — 쿼터 리셋(2026-10-05 00:00 UTC) 후 작업 2 planner가 인계
-   힌트(id 7~10)를 읽어 `report_finding`으로 등록하여 대시보드 "확정 발견" 집계 반영.
-4. **재파견 범위** — 로그인 성공 지점부터 이어서 자동 익스플로잇 로직을 재검증.
+**개선 제안(관찰된 이슈)**: `update_finding_report`에 독립 레코드 id(1~5) 전달 시 "기록을 찾을 수
+없음" 오류가 발생하고, 탐색 노드 id(19~23)로만 정상 갱신되었다 — 문서와 실동작 간 **id 규격
+불일치**를 기록(개선 제안).
 
 ---
 
 ## 6. 대상 보안 권고 (DVWA 맥락, 일반 권고)
 
-1. **SQLi** — PDO prepared statement 사용(impossible 레벨 참고)
-2. **명령인젝션** — `shell_exec` 금지, `escapeshellarg` + 화이트리스트 검증
-3. **업로드** — 확장자/MIME/내용 3중 검증, 웹루트 밖 저장, 실행권한 제거, 리스팅 Off
-4. **LFI** — `basename()` + 화이트리스트, `allow_url_include` Off 유지
-5. **XSS** — 출력 시 `htmlspecialchars(ENT_QUOTES)` 전면 적용, CSP 외부 소스 제거
-6. **CSRF/세션** — 비밀번호 변경에 현재 비밀번호+토큰 요구, 세션 토큰 CSPRNG, 로그인 실패 제한
-7. **패스워드 저장** — bcrypt/argon2 적용, 무솔트 MD5 금지
-8. **서버 설정** — 디렉터리 리스팅 비활성화(Apache `Options -Indexes`)
+1. **SQLi** — Prepared Statement(PDO) + 최소권한 DB 계정
+2. **명령 인젝션** — `shell_exec` 제거, 검증된 인자만 처리, 셸 호출 금지
+3. **파일 업로드** — 확장자/MIME 화이트리스트, 업로드 경로 PHP 실행 차단, 실행권한 제거
+4. **XSS/CSRF/토큰** — 출력 인코딩, 서버사이드 CSRF 토큰, 토큰 서버 검증
+5. **세션** — 세션 토큰 CSPRNG 랜덤화, 로그인 실패 차단/지연(lockout+backoff)
+6. **정보 노출** — 디렉터리 리스팅 비활성화(`Options -Indexes`), 오류 메시지 절대경로 마스킹
+7. **잔존 웹셸 제거** — `/hackable/uploads/artex_shell.php` 즉시 삭제 및 업로드 디렉터리 정화
 
 ---
 
 ## 7. 결론
 
-이번 세션은 ARTEX가 **대화 지시 → 작업 생성 → 워커 자동 실행 → 트레이스/그래프 추적**의
-오케스트레이션 흐름을 정상 수행함을 확인했다. 작업엔진이 무료 모델 레이트 리밋(429)으로
-중단되는 장애가 발생했으나, ARTEX는 이를 `model_error`로 정확히 분류했고, **Auto 대화
-레이어가 수동으로 전 취약점 모듈을 완수**하여 12종 취약점(총 15건, Critical 3건 포함)을
-확정·인계했다. 즉 ARTEX의 핵심 로직은 정상 동작하며, 엔진 장애 시에도 대화 레이어를 통한
-복원력이 확보됨을 입증했다. 남은 과제는 **모델 쿼터 확보 후 자동 익스플로잇 단계 재검증과
-발견 정식 등록(`report_finding`) 종단 파이프라인 완결**이다.
+이번 세션은 ARTEX가 **단일 대화 지시만으로 침투 테스트 작업을 자율 생성·실행·추적하고,
+라이브 재검증을 거쳐 발견을 플랫폼에 정식 등록(report_finding 15건)하기까지 전 파이프라인을
+엔드투엔드로 완주**함을 확인했다. 특히 유료 **GLM 5.3 Flash**로 수행하여 **레이트리밋 중단 없이**
+작업 생성·상속·힌트 인계·워커 자동 등록·기획자 실시간 교정 훅·상세보고서 등록이 모두 정상
+동작했다. 그 결과 Critical 3건을 포함한 **15건 취약점을 confirmed 상태로 등록**했다.
+
+> 무료 티어에서 관측됐던 레이트리밋 중단은 **초기 테스트의 일시적 현상**이었으며, 유료
+> 모델 전환으로 해소됨을 이번 완주로 실증했다. 관찰된 `update_finding_report` id 규격
+> 불일치만 개선 과제로 남는다.
 
 ### 7.1 방어 관점 — 관제센터는 ARTEX/LLM 해킹을 어떤 특징으로 탐지하는가
 
@@ -282,18 +214,19 @@ curl -s -b c.txt -X POST http://100.11.*.*/vulnerabilities/exec/ \
 | **단일 프록시 집중 egress** | 한 소스 IP에서 정찰·인증·주입·업로드 등 **서로 다른 벡터 ≥ 3종**이 한 세션창에 혼재 | 중간 |
 | **혼재된 클라이언트 정체성** | UA 리터럴 `artex-enrich/1.0`, Go·curl·모바일 Chromium의 **UA·JA3 혼재**, **모바일 UA ↔ 데이터센터 IP 불일치** | 중간·취약 |
 | **저소음·고정밀** | 요청 수는 적으나 **민감 엔드포인트 적중률이 비정상적으로 높은** 세션 | 중간 |
-| **LLM 호출 리듬** | tool-call마다 추론 지연이 끼는 버스트+갭(스캐너의 연속 폭주와 구별). 단 **수 분 단위 침묵·정시 재개는 모델 쿼터 한도에 좌우**되므로 유료 모델에서는 약해진다 | 가변 |
+| **LLM 호출 리듬** | tool-call마다 추론 지연이 끼는 버스트+갭(스캐너의 연속 폭주와 구별). 단 **수 분 단위 침묵은 모델 쿼터 한도에 좌우**되므로 유료 모델에서는 약해진다 | 가변 |
 
-> **유의 — 레이트 리밋은 '만능 차단책'이 아니다** — 본 세션에서 ARTEX가 멈춘 것은 **무료 티어 모델의
-> 분당 20회 한도(429)** 때문으로, 이는 **테스트 환경의 산물**이다. **유료·전용 모델에서는 이 한도가
-> 크게 완화·소멸하여 자동 엔진은 멈추지 않는다.** 따라서 방어측의 속도 제한은 공격자의 토큰 비용·
-> 소요 시간을 끌어올리는 **심층 방어의 한 겹일 뿐, 결정적 차단책이 아니다.** 모델 등급과 무관하게
-> 남는 가장 견고한 단서는 **"민감 응답 → 논리적 후속"의 적응형 체인(의미 상관)**이며, 탐지는 여기에
-> 다지표 상관과 인증 강화·자격증명 위생 같은 심층 방어를 더해 구성해야 한다. 세부 탐지룰·SIEM
-> 상관·플레이북은 별도 문서 「ARTEX 에이전트 탐지·관제센터 대응방안」에 정리되어 있다.
+> **유의 — 레이트 리밋은 '만능 차단책'이 아니다** — 본 세션이 바로 그 증거다. **유료 GLM 5.3
+> Flash에서는 레이트리밋 중단 없이 공격이 완주**되었다. 즉 방어측의 속도 제한은 공격자의
+> 토큰 비용·소요 시간을 끌어올리는 **심층 방어의 한 겹일 뿐, 결정적 차단책이 아니다.** 모델
+> 등급과 무관하게 남는 가장 견고한 단서는 **"민감 응답 → 논리적 후속"의 적응형 체인(의미
+> 상관)**이며, 탐지는 여기에 다지표 상관과 인증 강화·자격증명 위생 같은 심층 방어를 더해
+> 구성해야 한다. 세부 탐지룰·SIEM 상관·플레이북은 별도 문서
+> 「ARTEX 에이전트 탐지·관제센터 대응방안」에 정리되어 있다.
 
 ---
 
-*본 문서는 ARTEX 콘솔의 테스트 세션 로그(`pentest_log.md`, `pentest_report.md`,
-ARTEX 세션 로그)와 콘솔 스크린샷을 근거로, Auto 대화 흐름을 중심으로 정리한
-보고서입니다. 대상 DVWA는 보안 교육·검증 전용 환경입니다.*
+*본 문서는 ARTEX 콘솔의 테스트 세션 로그(`pentest_log.md`, `pentest_report.md`)와 콘솔
+스크린샷(그림 1~3)을 근거로, 유료 GLM 5.3 Flash 수행 세션을 Auto 대화 흐름 중심으로 정리한
+보고서입니다. 대상 사이트 IP는 보안상 `100.11.*.*`로 마스킹하였으며, 대상 DVWA는 보안
+교육·검증 전용 환경입니다.*
