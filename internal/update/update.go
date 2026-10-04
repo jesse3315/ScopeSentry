@@ -29,6 +29,7 @@ func Update() error {
 	// 确保 API Key 索引存在（幂等操作）
 	Update20()
 	UpdateKoPluginText()
+	UpdateSensitiveRuleNames()
 
 	configColl := mongodb.DB.Collection("config")
 	var result struct {
