@@ -8,7 +8,7 @@ import (
 	mcpSDK "github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
-// RegisterRoutes 注册 MCP Streamable HTTP 路由
+// RegisterRoutes MCP Streamable HTTP 라우트를 등록합니다
 func RegisterRoutes(router *gin.Engine) {
 	handler := mcpSDK.NewStreamableHTTPHandler(
 		func(_ *http.Request) *mcpSDK.Server { return newServer() },

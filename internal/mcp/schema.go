@@ -1,57 +1,57 @@
 package mcp
 
-// 资产查询相关工具说明（写入 Tool.Description，供 MCP 客户端展示）
-const listAssetsToolDesc = `查询 ScopeSentry 资产列表。
+// 자산 조회 관련 도구 설명 (Tool.Description에 기록되어 MCP 클라이언트에 표시됨)
+const listAssetsToolDesc = `ScopeSentry 자산 목록을 조회합니다.
 
-【接口与请求体】
-与各资产 POST 接口一致（如 /api/assets/asset），body 为 models.SearchRequest:
-- pageIndex, pageSize: 分页
-- search: 搜索表达式字符串（对应前端 Csearch 搜索框 searchParams）
-- filter: 精确过滤对象（对应前端项目/任务下拉、统计侧栏点击、表格列筛选，合并后传入）
-- sort: 排序（多数类型无效）
-- sid: 仅 SensitiveResult 敏感规则名
+[엔드포인트와 요청 본문]
+각 자산의 POST 엔드포인트와 동일 (예: /api/assets/asset), body는 models.SearchRequest:
+- pageIndex, pageSize: 페이지네이션
+- search: 검색 표현식 문자열 (프런트엔드 Csearch 검색창의 searchParams에 대응)
+- filter: 정확 필터 객체 (프런트엔드의 프로젝트/작업 드롭다운, 통계 사이드바 클릭, 테이블 열 필터에 대응하며 병합되어 전달됨)
+- sort: 정렬 (대부분의 유형에서 무효)
+- sid: SensitiveResult 전용, 민감 정보 규칙 이름
 
-MCP 的 asset_type 会映射为后端 Index（如 asset→"asset"），再调用 helper.GetSearchQuery 生成 MongoDB 查询。
+MCP의 asset_type은 백엔드 Index로 매핑되며 (예: asset→"asset"), 이후 helper.GetSearchQuery를 호출해 MongoDB 쿼리를 생성합니다.
 
-【前端参数分工（Csearch.vue + 各资产页）】
-- search: 用户在搜索框输入的 DSL，如 domain=baidu && port==443
-- filter.project: ElTreeSelect 选中值，为项目 ObjectID 数组（非项目名）
-- filter.task: ElSelect 选中值，为任务名称数组（非任务 ID）；也可用动态标签 task=名称 写入 filter
-- filter 还可来自: 统计侧栏点击(port/service/app/icon)、表格列筛选(statuscode/level/type/status 等)
-- 注意: 各资产页 searchKeywordsData 里虽有 project 提示，但后端 SearchToMongoDB 未注册 project 关键字，project 只能走 filter
+[프런트엔드 파라미터 역할 분담 (Csearch.vue + 각 자산 페이지)]
+- search: 사용자가 검색창에 입력하는 DSL, 예: domain=baidu && port==443
+- filter.project: ElTreeSelect 선택값, 프로젝트 ObjectID 배열 (프로젝트 이름 아님)
+- filter.task: ElSelect 선택값, 작업 이름 배열 (작업 ID 아님); 동적 태그 task=이름 으로 filter에 기록할 수도 있음
+- filter는 다음에서도 올 수 있음: 통계 사이드바 클릭(port/service/app/icon), 테이블 열 필터(statuscode/level/type/status 등)
+- 주의: 각 자산 페이지의 searchKeywordsData에 project 힌트가 있지만, 백엔드 SearchToMongoDB에 project 키워드가 등록되어 있지 않으므로 project는 filter로만 지정 가능
 
-asset_type 可选值:
-- asset: Web/端口资产
-- RootDomain: 根域名
-- subdomain: 子域名
-- app: 移动应用
-- mp: 小程序
+asset_type 선택 가능 값:
+- asset: Web/포트 자산
+- RootDomain: 루트 도메인
+- subdomain: 서브도메인
+- app: 모바일 앱
+- mp: 미니 프로그램
 - UrlScan: URL
-- SensitiveResult: 敏感信息
-- DirScanResult: 目录扫描
-- crawler: 爬虫
-- vulnerability: 漏洞
-- PageMonitoring: 页面监控
-- IPAsset: IP 聚合资产
-- SubdomainTakerResult: 子域接管
+- SensitiveResult: 민감 정보
+- DirScanResult: 디렉터리 스캔
+- crawler: 크롤러
+- vulnerability: 취약점
+- PageMonitoring: 페이지 모니터링
+- IPAsset: IP 집계 자산
+- SubdomainTakerResult: 서브도메인 탈취
 
-【search 搜索表达式】（非 SQL，为自定义 DSL，由 helper.SearchToMongoDB 解析）
-- field=value : 模糊匹配（不区分大小写）
-- field=="值" : 精确匹配，含空格的值需加双引号
-- field!="值" : 排除匹配
-- expr1 && expr2 : 与
-- expr1 || expr2 : 或
-- (expr) : 分组
-- 通用 search 字段(所有类型，SearchToMongoDB 注入): tag→tags、task→taskName（任务名）、rootDomain
-- project 不支持 search，只能通过 filter.project（值为项目 ObjectID，list_projects / list_projects_data 获取）
+[search 검색 표현식] (SQL 아님, 커스텀 DSL이며 helper.SearchToMongoDB가 파싱)
+- field=value : 부분 일치 (대소문자 구분 없음)
+- field=="값" : 정확 일치, 공백이 포함된 값은 큰따옴표로 감싸야 함
+- field!="값" : 제외 일치
+- expr1 && expr2 : AND
+- expr1 || expr2 : OR
+- (expr) : 그룹
+- 공통 search 필드 (모든 유형, SearchToMongoDB가 주입): tag→tags, task→taskName (작업 이름), rootDomain
+- project는 search를 지원하지 않으며 filter.project로만 지정 가능 (값은 프로젝트 ObjectID, list_projects / list_projects_data로 조회)
 
-各 asset_type 可用 search 关键字 → MongoDB 字段:
+각 asset_type에서 사용 가능한 search 키워드 → MongoDB 필드:
 - asset: domain→host, ip, port, service, app→technologies, title, statuscode, icon→faviconmmh3, banner→metadata, type, body, header→rawheaders
 - RootDomain: domain, icp, company
 - subdomain: domain→host, ip, type, value
 - app: name, icp, company, category, description, url, apk
 - mp: name, icp, company, category, description, url
-- UrlScan: url→output, input, source, resultId, type→outputtype（无 statuscode search；HTTP 状态码仅 filter.status）
+- UrlScan: url→output, input, source, resultId, type→outputtype (statuscode search 없음; HTTP 상태 코드는 filter.status만 가능)
 - SensitiveResult: url, sname→sid, body, info→match, md5
 - DirScanResult: url, statuscode→status, redirect→msg, length
 - vulnerability: url, vulname, matched, request, response, level
@@ -60,124 +60,124 @@ asset_type 可选值:
 - IPAsset: ip, domain→ports.server.domain, port→ports.port, service→ports.server.service, webServer→ports.server.webServer, app→ports.server.technologies
 - SubdomainTakerResult: domain→input, value, type→cname, response
 
-search 示例:
+search 예시:
 - domain=baidu && port==443
 - port==443 && service=nginx
-- title="后台登录" || body=admin
+- title="관리자 로그인" || body=admin
 
-【filter 精确过滤】（与 search 可组合；由 helper.GetSearchQuery 追加 $and 条件）
-JSON 对象，key 为筛选维度，value 为字符串数组（同 key 多值为 OR，不同 key 之间为 AND）。
-仅 filterKeyCache 中定义的 key 生效，其余 key 会被忽略。
+[filter 정확 필터] (search와 조합 가능; helper.GetSearchQuery가 $and 조건으로 추가)
+JSON 객체이며 key는 필터 차원, value는 문자열 배열 (같은 key의 여러 값은 OR, 서로 다른 key 간에는 AND).
+filterKeyCache에 정의된 key만 적용되며 나머지 key는 무시됩니다.
 
-filter 要点:
-- project: 仅 filter，值为项目 ObjectID 数组（数据库存 ID；展示时部分接口会转成项目名）
-- task: 可用 search（task=="任务名"）或 filter.task（任务名数组）；值为 list_tasks 的 name，非任务 ID
-- 同 key 多值 OR，不同 key AND；未在 filterKeyCache 的 key 被忽略
+filter 요점:
+- project: filter 전용, 값은 프로젝트 ObjectID 배열 (DB에는 ID로 저장; 일부 엔드포인트는 표시 시 프로젝트 이름으로 변환)
+- task: search (task=="작업 이름") 또는 filter.task (작업 이름 배열) 사용 가능; 값은 list_tasks의 name이며 작업 ID 아님
+- 같은 key의 여러 값은 OR, 서로 다른 key는 AND; filterKeyCache에 없는 key는 무시됨
 
-全局 filter key → MongoDB 字段:
+전역 filter key → MongoDB 필드:
 - project→project, port→port, service→service, app→technologies
 - icon→faviconmmh3, statuscode→statuscode, status→status
 - level→level, type→type, color→color, tags→tags
 - task→taskName, sname→sid
 
-各 asset_type 可用 filter（未列出的 key 对该集合无效或字段不存在）:
+각 asset_type에서 사용 가능한 filter (나열되지 않은 key는 해당 컬렉션에서 무효이거나 필드가 없음):
 - asset: project, port, service, app, icon, statuscode, type, task, tags
 - RootDomain: project, tags
 - subdomain: project, type, task, tags
 - app / mp: project, tags
-- UrlScan: status（HTTP 状态码，非 statuscode）, tags
-- SensitiveResult: status（1未处理/2处理中/3忽略/4疑似/5确认/6已处理）, color, sname, tags
-- DirScanResult: status（HTTP 状态码）, tags
+- UrlScan: status (HTTP 상태 코드, statuscode 아님), tags
+- SensitiveResult: status (1 미처리/2 처리 중/3 무시/4 의심/5 확인/6 처리 완료), color, sname, tags
+- DirScanResult: status (HTTP 상태 코드), tags
 - crawler: project, task, tags
-- vulnerability: project, level（critical/high/medium/low/info/unknown）, status（1-6）, task, tags
+- vulnerability: project, level (critical/high/medium/low/info/unknown), status (1-6), task, tags
 - PageMonitoring: tags
-- IPAsset: project, port, service, app（嵌套 ports 字段，走聚合查询）
+- IPAsset: project, port, service, app (중첩된 ports 필드, 집계 쿼리 사용)
 - SubdomainTakerResult: tags
 
-filter 示例（project 必须为 ObjectID，不可用项目名）:
-- asset: {"project":["<项目ObjectID>"],"port":["443"]}
-- subdomain: {"project":["<项目ObjectID>"],"type":["A"]}
-- vulnerability: {"project":["<项目ObjectID>"],"level":["high"]}
+filter 예시 (project는 반드시 ObjectID여야 하며 프로젝트 이름은 사용 불가):
+- asset: {"project":["<프로젝트ObjectID>"],"port":["443"]}
+- subdomain: {"project":["<프로젝트ObjectID>"],"type":["A"]}
+- vulnerability: {"project":["<프로젝트ObjectID>"],"level":["high"]}
 
-search + filter 组合示例:
-- search: domain=baidu && port==443，filter: {"project":["<项目ObjectID>"]}
+search + filter 조합 예시:
+- search: domain=baidu && port==443, filter: {"project":["<프로젝트ObjectID>"]}
 
-注意:
-- 勿在 search 中写 project=... 或 project=="..."（无效或与 && 组合报错）
-- DirScanResult 的 HTTP 状态码仅在 search 中用 statuscode（如 statuscode==200）
-- UrlScan 无 statuscode search；状态筛选用 filter.status
-- SensitiveResult 规则名筛选：search 用 sname=规则名，或 filter.sname
+주의:
+- search에 project=... 또는 project=="..."를 쓰지 마세요 (무효이거나 &&와 조합 시 오류 발생)
+- DirScanResult의 HTTP 상태 코드는 search에서만 statuscode로 사용 (예: statuscode==200)
+- UrlScan에는 statuscode search가 없음; 상태 필터는 filter.status 사용
+- SensitiveResult 규칙 이름 필터: search에서 sname=규칙이름, 또는 filter.sname
 
-【sort 排序】
-- UrlScan / DirScanResult: 支持 {"length":"ascending"} 升序，其他值（含 "descending"、"-1"）为降序
-- 其余类型: 服务端固定按 time 或 _id 排序，sort 参数通常无效
+[sort 정렬]
+- UrlScan / DirScanResult: {"length":"ascending"} 오름차순 지원, 그 외 값 ("descending", "-1" 포함)은 내림차순
+- 그 외 유형: 서버에서 time 또는 _id 기준으로 고정 정렬, sort 파라미터는 보통 무효
 
-【sid 参数】
-仅 SensitiveResult: 传敏感规则名称（sid），用于按规则展开匹配详情（对应前端点击规则名）`
+[sid 파라미터]
+SensitiveResult 전용: 민감 정보 규칙 이름(sid)을 전달하며, 규칙별로 매칭 상세를 펼치는 데 사용 (프런트엔드에서 규칙 이름 클릭에 대응)`
 
-// createScanTemplateToolDesc 扫描模板创建说明
-const createScanTemplateToolDesc = `创建扫描模板。
+// createScanTemplateToolDesc 스캔 템플릿 생성 설명
+const createScanTemplateToolDesc = `스캔 템플릿을 생성합니다.
 
-扫描模板由多个【模块】(流水线阶段)组成，每个模块下挂载若干【插件】，
-模块字段引用的是插件的 hash（不是插件 id，也不是插件名）。
+스캔 템플릿은 여러 [모듈](파이프라인 단계)로 구성되며, 각 모듈에는 여러 [플러그인]이 연결됩니다.
+모듈 필드는 플러그인의 hash를 참조합니다 (플러그인 id나 플러그인 이름이 아님).
 
-推荐创建流程:
-1. list_plugin_modules 获取全部模块名
-2. list_plugins (可按 module 过滤) 获取每个模块下可用插件的 hash 与默认 parameter
-3. 用 modules 参数指定 模块->插件hash列表 (同模块内按数组顺序执行)
-4. 本工具会自动按插件默认参数回填 Parameters；如需自定义参数用 parameters 覆盖
+권장 생성 절차:
+1. list_plugin_modules로 전체 모듈 이름 조회
+2. list_plugins (module로 필터 가능)로 각 모듈에서 사용 가능한 플러그인의 hash와 기본 parameter 조회
+3. modules 파라미터로 모듈->플러그인hash 목록 지정 (같은 모듈 내에서는 배열 순서대로 실행)
+4. 이 도구는 플러그인 기본 파라미터로 Parameters를 자동으로 채움; 사용자 정의 파라미터가 필요하면 parameters로 덮어쓰기
 
-参数说明:
-- name: 模板名称，必填
-- modules: {模块名: [插件hash,...]}，如 {"SubdomainScan":["d60ba73c..."],"PortScan":["..."]}
-- parameters: 可选，{模块名: {插件hash: 参数字符串}}，覆盖默认参数
-- vullist: 可选，nuclei POC 模板 ID 列表 (VulnerabilityScan 用 nuclei 时)
-- template_json: 可选，完整 ScanTemplate JSON，优先级最高，用于高级自定义
+파라미터 설명:
+- name: 템플릿 이름, 필수
+- modules: {모듈이름: [플러그인hash,...]}, 예: {"SubdomainScan":["d60ba73c..."],"PortScan":["..."]}
+- parameters: 선택, {모듈이름: {플러그인hash: 파라미터 문자열}}, 기본 파라미터를 덮어씀
+- vullist: 선택, nuclei POC 템플릿 ID 목록 (VulnerabilityScan에서 nuclei 사용 시)
+- template_json: 선택, 완전한 ScanTemplate JSON, 우선순위가 가장 높으며 고급 사용자 정의용
 
-创建成功返回模板 id，可直接用于 create_scan_task 的 template 参数。
+생성 성공 시 템플릿 id를 반환하며, create_scan_task의 template 파라미터에 바로 사용할 수 있습니다.
 
-常见模块: TargetHandler, SubdomainScan, SubdomainSecurity, PortScanPreparation,
+주요 모듈: TargetHandler, SubdomainScan, SubdomainSecurity, PortScanPreparation,
 PortScan, PortFingerprint, AssetMapping, AssetHandle, URLScan, WebCrawler,
 URLSecurity, DirScan, VulnerabilityScan, PassiveScan`
 
-// createScanTaskToolDesc 扫描任务创建说明（与 Web 端 /api/task/add 及 common.Insert 逻辑一致）
-const createScanTaskToolDesc = `创建扫描任务。必填 name、node；template 为扫描模板 ObjectID（list_scan_templates 获取）。
+// createScanTaskToolDesc 스캔 작업 생성 설명 (Web의 /api/task/add 및 common.Insert 로직과 동일)
+const createScanTaskToolDesc = `스캔 작업을 생성합니다. name, node는 필수; template은 스캔 템플릿 ObjectID (list_scan_templates로 조회).
 
-【目标来源 targetSource】决定任务目标如何解析（对应 internal/services/task/common/common.go）:
-- general: 直接使用 target 字段（多行/逗号分隔域名、IP、URL）
-- project: 从关联项目读取目标，填 project（项目 ObjectID 数组），不需 target
-- asset: 从 Web 资产库搜索选取，需 search；可选 project、filter、targetNumber
-- RootDomain: 从根域名库搜索选取，需 search；可选 project、filter、targetNumber
-- subdomain: 从子域名库搜索选取，需 search；可选 project、filter、targetNumber
-- UrlScan: 从 URL 扫描结果搜索选取，需 search；可选 project、filter、targetNumber
-- assetSource / RootDomainSource / subdomainSource / UrlScanSource: 从对应资产页创建任务
-  - targetTp=search: 用 search + filter + project + targetNumber 筛选目标
-  - targetTp=select: 用 targetIds 指定资产 ObjectID 列表
+[대상 소스 targetSource] 작업 대상을 어떻게 해석할지 결정 (internal/services/task/common/common.go에 대응):
+- general: target 필드를 직접 사용 (여러 줄/쉼표로 구분된 도메인, IP, URL)
+- project: 연결된 프로젝트에서 대상을 읽음, project (프로젝트 ObjectID 배열) 입력, target 불필요
+- asset: Web 자산 DB에서 검색해 선택, search 필요; 선택 project, filter, targetNumber
+- RootDomain: 루트 도메인 DB에서 검색해 선택, search 필요; 선택 project, filter, targetNumber
+- subdomain: 서브도메인 DB에서 검색해 선택, search 필요; 선택 project, filter, targetNumber
+- UrlScan: URL 스캔 결과에서 검색해 선택, search 필요; 선택 project, filter, targetNumber
+- assetSource / RootDomainSource / subdomainSource / UrlScanSource: 해당 자산 페이지에서 작업 생성
+  - targetTp=search: search + filter + project + targetNumber로 대상 필터링
+  - targetTp=select: targetIds로 자산 ObjectID 목록 지정
 
-【search】搜索表达式，语法同 list_assets（如 task=="某任务名"、domain=^example.com）。
-从子域名续扫示例: targetSource=subdomain, search=task=="子域名收集任务名"
+[search] 검색 표현식, 문법은 list_assets와 동일 (예: task=="어떤작업이름", domain=^example.com).
+서브도메인에서 이어서 스캔하는 예시: targetSource=subdomain, search=task=="서브도메인 수집 작업 이름"
 
-【filter】精确过滤 JSON，与 search 可组合；filter.project 为项目 ObjectID。
-【targetNumber】search 模式下的目标数量上限，0 表示不限制。
-【targetIds】select 模式下选中的资产 ObjectID 列表。
+[filter] 정확 필터 JSON, search와 조합 가능; filter.project는 프로젝트 ObjectID.
+[targetNumber] search 모드에서의 대상 수 상한, 0은 제한 없음.
+[targetIds] select 모드에서 선택한 자산 ObjectID 목록.
 
-【其他参数】
-- allNode: 自动加入全部在线节点
-- ignore / duplicates: 忽略目标、去重策略
-- bindProject: 绑定项目（结果归属）
-- scheduledTasks + cycleType/hour/minute/day/week: 计划任务
+[기타 파라미터]
+- allNode: 온라인 상태인 모든 노드를 자동 추가
+- ignore / duplicates: 무시할 대상, 중복 제거 전략
+- bindProject: 프로젝트 바인딩 (결과 귀속)
+- scheduledTasks + cycleType/hour/minute/day/week: 예약 작업
 
-根域名完整信息收集推荐两阶段: 先用 general + 仅 SubdomainScan/SubdomainSecurity 扫根域名；
-完成后用 subdomain + search=task=="上一任务名" 创建后续模块任务。`
+루트 도메인 전체 정보 수집은 2단계 권장: 먼저 general + SubdomainScan/SubdomainSecurity만으로 루트 도메인 스캔;
+완료 후 subdomain + search=task=="이전 작업 이름"으로 후속 모듈 작업 생성.`
 
-// countAssetsToolDesc 资产数量统计（对应 POST /api/assets/common/total）
-const countAssetsToolDesc = `统计符合条件的资产数量（Web 端分页「共 N 条」同源接口 /api/assets/common/total）。
+// countAssetsToolDesc 자산 수 통계 (POST /api/assets/common/total에 대응)
+const countAssetsToolDesc = `조건에 맞는 자산 수를 집계합니다 (Web 페이지네이션의 "총 N건"과 동일한 엔드포인트 /api/assets/common/total).
 
-参数与 list_assets 的 search/filter 一致，但不分页，只返回 total。
-asset_type 取值同 list_assets（asset、RootDomain、subdomain、vulnerability 等）。
+파라미터는 list_assets의 search/filter와 동일하지만 페이지네이션 없이 total만 반환합니다.
+asset_type 값은 list_assets와 동일 (asset, RootDomain, subdomain, vulnerability 등).
 
-示例：统计某项目下子域名数量
-{"asset_type":"subdomain","filter":{"project":["<项目ObjectID>"]}}
+예시: 특정 프로젝트의 서브도메인 수 집계
+{"asset_type":"subdomain","filter":{"project":["<프로젝트ObjectID>"]}}
 
-示例：统计某任务产生的 Web 资产
-{"asset_type":"asset","search":"task==\"某任务名\""}`
+예시: 특정 작업에서 생성된 Web 자산 집계
+{"asset_type":"asset","search":"task==\"어떤작업이름\""}`

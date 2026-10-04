@@ -78,52 +78,52 @@ var d = &deps{
 func registerTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_projects",
-		Description: "获取按标签分组的项目列表",
+		Description: "태그별로 그룹화된 프로젝트 목록 조회",
 	}, listProjects)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_projects_data",
-		Description: "分页获取项目列表，支持搜索",
+		Description: "프로젝트 목록을 페이지네이션으로 조회 (검색 지원)",
 	}, listProjectsData)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_project",
-		Description: "根据项目 ID 获取项目详情",
+		Description: "프로젝트 ID로 프로젝트 상세 정보 조회",
 	}, getProject)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "create_project",
-		Description: "创建新项目。必填 name 和 target，可选 tag、template、node 等",
+		Description: "새 프로젝트 생성. name과 target은 필수, tag, template, node 등은 선택",
 	}, createProject)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_tasks",
-		Description: "分页获取扫描任务列表",
+		Description: "스캔 작업 목록을 페이지네이션으로 조회",
 	}, listTasks)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_task",
-		Description: "根据任务 ID 获取任务详情",
+		Description: "작업 ID로 작업 상세 정보 조회",
 	}, getTask)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_scan_templates",
-		Description: "分页获取扫描模板列表",
+		Description: "스캔 템플릿 목록을 페이지네이션으로 조회",
 	}, listScanTemplates)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_scan_template",
-		Description: "根据模板 ID 获取扫描模板详情",
+		Description: "템플릿 ID로 스캔 템플릿 상세 정보 조회",
 	}, getScanTemplate)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_plugin_modules",
-		Description: "获取扫描模板的全部模块名（流水线阶段）。扫描模板由这些模块构成，每个模块下挂载若干插件。",
+		Description: "스캔 템플릿의 전체 모듈명(파이프라인 단계) 조회. 스캔 템플릿은 이 모듈들로 구성되며, 각 모듈에는 여러 플러그인이 연결됩니다.",
 	}, listPluginModules)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_plugins",
-		Description: "获取可用扫描插件，可按 module 过滤。返回每个插件的 hash、name、module、默认 parameter。创建扫描模板时，模块字段引用的就是插件 hash。",
+		Description: "사용 가능한 스캔 플러그인 조회, module로 필터링 가능. 각 플러그인의 hash, name, module, 기본 parameter를 반환합니다. 스캔 템플릿 생성 시 모듈 필드는 플러그인 hash를 참조합니다.",
 	}, listPlugins)
 
 	mcp.AddTool(server, &mcp.Tool{
@@ -148,31 +148,31 @@ func registerTools(server *mcp.Server) {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "get_asset_detail",
-		Description: "获取资产详情，asset_type 支持 asset 或 vulnerability",
+		Description: "자산 상세 정보 조회, asset_type은 asset 또는 vulnerability 지원",
 	}, getAssetDetail)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "add_asset_tag",
-		Description: "为资产添加标签",
+		Description: "자산에 태그 추가",
 	}, addAssetTag)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_nodes",
-		Description: "获取扫描节点列表，online_only=true 时仅返回在线节点",
+		Description: "스캔 노드 목록 조회, online_only=true이면 온라인 노드만 반환",
 	}, listNodes)
 }
 
 type listProjectsDataInput struct {
-	Search    string `json:"search,omitempty" jsonschema:"项目名称模糊搜索关键词"`
-	PageIndex int    `json:"pageIndex,omitempty" jsonschema:"页码，从 1 开始，默认 1"`
-	PageSize  int    `json:"pageSize,omitempty" jsonschema:"每页条数，默认 20"`
+	Search    string `json:"search,omitempty" jsonschema:"프로젝트 이름 퍼지 검색 키워드"`
+	PageIndex int    `json:"pageIndex,omitempty" jsonschema:"페이지 번호, 1부터 시작, 기본값 1"`
+	PageSize  int    `json:"pageSize,omitempty" jsonschema:"페이지당 항목 수, 기본값 20"`
 }
 
 func listProjects(ctx context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
 	c := ginContext(ctx)
 	result, err := d.projectService.GetProjectsByTag(c)
 	if err != nil {
-		return errorResult("获取项目列表失败", err)
+		return errorResult("프로젝트 목록 조회 실패", err)
 	}
 	return jsonToolResult(ginH{"list": result})
 }
@@ -187,46 +187,46 @@ func listProjectsData(ctx context.Context, _ *mcp.CallToolRequest, input listPro
 	c := ginContext(ctx)
 	result, err := d.projectService.GetProjectsData(c, input.Search, input.PageIndex, input.PageSize)
 	if err != nil {
-		return errorResult("获取项目数据失败", err)
+		return errorResult("프로젝트 데이터 조회 실패", err)
 	}
 	return jsonToolResult(result)
 }
 
 type getProjectInput struct {
-	ID string `json:"id" jsonschema:"项目 MongoDB ObjectID"`
+	ID string `json:"id" jsonschema:"프로젝트 MongoDB ObjectID"`
 }
 
 func getProject(ctx context.Context, _ *mcp.CallToolRequest, input getProjectInput) (*mcp.CallToolResult, any, error) {
 	if input.ID == "" {
-		return errorResult("id 不能为空", nil)
+		return errorResult("id는 비워 둘 수 없습니다", nil)
 	}
 	c := ginContext(ctx)
 	result, err := d.projectService.GetProjectContent(c, input.ID)
 	if err != nil {
-		return errorResult("获取项目详情失败", err)
+		return errorResult("프로젝트 상세 정보 조회 실패", err)
 	}
 	if result == nil {
-		return errorResult("项目不存在", nil)
+		return errorResult("프로젝트가 존재하지 않습니다", nil)
 	}
 	return jsonToolResult(result)
 }
 
 type createProjectInput struct {
-	Name           string   `json:"name" jsonschema:"项目名称，必填"`
-	Tag            string   `json:"tag,omitempty" jsonschema:"项目标签，用于分组"`
-	Target         string   `json:"target" jsonschema:"扫描目标，必填。多行或逗号分隔，支持域名/IP/URL 等"`
-	Template       string   `json:"template,omitempty" jsonschema:"关联扫描模板 ID"`
-	Node           []string `json:"node,omitempty" jsonschema:"指定扫描节点名称列表"`
-	AllNode        bool     `json:"allNode,omitempty" jsonschema:"是否使用全部节点"`
-	Ignore         string   `json:"ignore,omitempty" jsonschema:"忽略目标列表，格式同 target"`
-	Duplicates     string   `json:"duplicates,omitempty" jsonschema:"去重策略"`
-	ScheduledTasks bool     `json:"scheduledTasks,omitempty" jsonschema:"是否启用定时扫描"`
-	Hour           int      `json:"hour,omitempty" jsonschema:"定时扫描间隔（小时），仅在启用 scheduledTasks 时有效"`
+	Name           string   `json:"name" jsonschema:"프로젝트 이름, 필수"`
+	Tag            string   `json:"tag,omitempty" jsonschema:"프로젝트 태그, 그룹화에 사용"`
+	Target         string   `json:"target" jsonschema:"스캔 대상, 필수. 여러 줄 또는 쉼표로 구분, 도메인/IP/URL 등 지원"`
+	Template       string   `json:"template,omitempty" jsonschema:"연결할 스캔 템플릿 ID"`
+	Node           []string `json:"node,omitempty" jsonschema:"지정할 스캔 노드 이름 목록"`
+	AllNode        bool     `json:"allNode,omitempty" jsonschema:"모든 노드 사용 여부"`
+	Ignore         string   `json:"ignore,omitempty" jsonschema:"무시할 대상 목록, 형식은 target과 동일"`
+	Duplicates     string   `json:"duplicates,omitempty" jsonschema:"중복 제거 전략"`
+	ScheduledTasks bool     `json:"scheduledTasks,omitempty" jsonschema:"예약 스캔 활성화 여부"`
+	Hour           int      `json:"hour,omitempty" jsonschema:"예약 스캔 간격(시간), scheduledTasks 활성화 시에만 유효"`
 }
 
 func createProject(ctx context.Context, _ *mcp.CallToolRequest, input createProjectInput) (*mcp.CallToolResult, any, error) {
 	if input.Name == "" || input.Target == "" {
-		return errorResult("name 和 target 不能为空", nil)
+		return errorResult("name과 target은 비워 둘 수 없습니다", nil)
 	}
 	p := &models.Project{
 		Name:           input.Name,
@@ -243,15 +243,15 @@ func createProject(ctx context.Context, _ *mcp.CallToolRequest, input createProj
 	}
 	c := ginContext(ctx)
 	if err := d.projectService.AddProject(c, p); err != nil {
-		return errorResult("创建项目失败", err)
+		return errorResult("프로젝트 생성 실패", err)
 	}
-	return jsonToolResult(ginH{"success": true, "message": "项目创建成功"})
+	return jsonToolResult(ginH{"success": true, "message": "프로젝트 생성 성공"})
 }
 
 type listTasksInput struct {
-	Search    string `json:"search,omitempty" jsonschema:"任务名称模糊搜索"`
-	PageIndex int    `json:"pageIndex,omitempty" jsonschema:"页码，从 1 开始，默认 1"`
-	PageSize  int    `json:"pageSize,omitempty" jsonschema:"每页条数，默认 20"`
+	Search    string `json:"search,omitempty" jsonschema:"작업 이름 퍼지 검색"`
+	PageIndex int    `json:"pageIndex,omitempty" jsonschema:"페이지 번호, 1부터 시작, 기본값 1"`
+	PageSize  int    `json:"pageSize,omitempty" jsonschema:"페이지당 항목 수, 기본값 20"`
 }
 
 func listTasks(ctx context.Context, _ *mcp.CallToolRequest, input listTasksInput) (*mcp.CallToolResult, any, error) {
@@ -264,34 +264,34 @@ func listTasks(ctx context.Context, _ *mcp.CallToolRequest, input listTasksInput
 	c := ginContext(ctx)
 	tasks, total, err := d.taskService.List(c, input.Search, input.PageIndex, input.PageSize)
 	if err != nil {
-		return errorResult("获取任务列表失败", err)
+		return errorResult("작업 목록 조회 실패", err)
 	}
 	return jsonToolResult(ginH{"list": tasks, "total": total})
 }
 
 type getTaskInput struct {
-	ID string `json:"id" jsonschema:"任务 MongoDB ObjectID"`
+	ID string `json:"id" jsonschema:"작업 MongoDB ObjectID"`
 }
 
 func getTask(ctx context.Context, _ *mcp.CallToolRequest, input getTaskInput) (*mcp.CallToolResult, any, error) {
 	if input.ID == "" {
-		return errorResult("id 不能为空", nil)
+		return errorResult("id는 비워 둘 수 없습니다", nil)
 	}
 	c := ginContext(ctx)
 	result, err := d.taskService.GetTaskDetail(c, input.ID)
 	if err != nil {
-		return errorResult("获取任务详情失败", err)
+		return errorResult("작업 상세 정보 조회 실패", err)
 	}
 	if result == nil {
-		return errorResult("任务不存在", nil)
+		return errorResult("작업이 존재하지 않습니다", nil)
 	}
 	return jsonToolResult(result)
 }
 
 type listScanTemplatesInput struct {
-	Query     string `json:"query,omitempty" jsonschema:"模板名称模糊搜索"`
-	PageIndex int    `json:"pageIndex,omitempty" jsonschema:"页码，从 1 开始，默认 1"`
-	PageSize  int    `json:"pageSize,omitempty" jsonschema:"每页条数，默认 20"`
+	Query     string `json:"query,omitempty" jsonschema:"템플릿 이름 퍼지 검색"`
+	PageIndex int    `json:"pageIndex,omitempty" jsonschema:"페이지 번호, 1부터 시작, 기본값 1"`
+	PageSize  int    `json:"pageSize,omitempty" jsonschema:"페이지당 항목 수, 기본값 20"`
 }
 
 func listScanTemplates(ctx context.Context, _ *mcp.CallToolRequest, input listScanTemplatesInput) (*mcp.CallToolResult, any, error) {
@@ -303,38 +303,38 @@ func listScanTemplates(ctx context.Context, _ *mcp.CallToolRequest, input listSc
 	}
 	result, err := d.templateService.List(ctx, input.PageIndex, input.PageSize, input.Query)
 	if err != nil {
-		return errorResult("获取模板列表失败", err)
+		return errorResult("템플릿 목록 조회 실패", err)
 	}
 	return jsonToolResult(result)
 }
 
 type getScanTemplateInput struct {
-	ID string `json:"id" jsonschema:"扫描模板 MongoDB ObjectID"`
+	ID string `json:"id" jsonschema:"스캔 템플릿 MongoDB ObjectID"`
 }
 
 func getScanTemplate(ctx context.Context, _ *mcp.CallToolRequest, input getScanTemplateInput) (*mcp.CallToolResult, any, error) {
 	if input.ID == "" {
-		return errorResult("id 不能为空", nil)
+		return errorResult("id는 비워 둘 수 없습니다", nil)
 	}
 	c := ginContext(ctx)
 	result, err := d.templateService.Detail(c, input.ID)
 	if err != nil {
-		return errorResult("获取模板详情失败", err)
+		return errorResult("템플릿 상세 정보 조회 실패", err)
 	}
 	return jsonToolResult(result)
 }
 
 type createScanTemplateInput struct {
-	Name         string                       `json:"name" jsonschema:"模板名称，必填"`
-	Modules      map[string][]string          `json:"modules,omitempty" jsonschema:"模块到插件 hash 列表的映射。key 为模块名(用 list_plugin_modules 获取)，value 为该模块下要启用的插件 hash 数组(用 list_plugins 获取，按数组顺序执行)。例 {\"SubdomainScan\":[\"d60ba73c...\"]}"`
-	Parameters   map[string]map[string]string `json:"parameters,omitempty" jsonschema:"可选，覆盖插件运行参数。结构为 模块名->插件hash->参数字符串。不提供时自动使用插件默认参数"`
-	VulList      []string                     `json:"vullist,omitempty" jsonschema:"可选，nuclei POC 模板 ID 列表，仅 VulnerabilityScan 使用 nuclei 时有效"`
-	TemplateJSON string                       `json:"template_json,omitempty" jsonschema:"可选，完整 ScanTemplate JSON。提供时优先于 modules，用于高级自定义"`
+	Name         string                       `json:"name" jsonschema:"템플릿 이름, 필수"`
+	Modules      map[string][]string          `json:"modules,omitempty" jsonschema:"모듈에서 플러그인 hash 목록으로의 매핑. key는 모듈명(list_plugin_modules로 조회), value는 해당 모듈에서 활성화할 플러그인 hash 배열(list_plugins로 조회, 배열 순서대로 실행). 예: {\"SubdomainScan\":[\"d60ba73c...\"]}"`
+	Parameters   map[string]map[string]string `json:"parameters,omitempty" jsonschema:"선택, 플러그인 실행 파라미터 재정의. 구조는 모듈명->플러그인 hash->파라미터 문자열. 제공하지 않으면 플러그인 기본 파라미터를 자동 사용"`
+	VulList      []string                     `json:"vullist,omitempty" jsonschema:"선택, nuclei POC 템플릿 ID 목록, VulnerabilityScan에서 nuclei를 사용할 때만 유효"`
+	TemplateJSON string                       `json:"template_json,omitempty" jsonschema:"선택, 전체 ScanTemplate JSON. 제공 시 modules보다 우선하며, 고급 사용자 정의에 사용"`
 }
 
 func createScanTemplate(ctx context.Context, _ *mcp.CallToolRequest, input createScanTemplateInput) (*mcp.CallToolResult, any, error) {
 	if input.Name == "" && input.TemplateJSON == "" {
-		return errorResult("name 或 template_json 至少提供一个", nil)
+		return errorResult("name 또는 template_json 중 최소 하나는 제공해야 합니다", nil)
 	}
 
 	var tmpl *models.ScanTemplate
@@ -343,7 +343,7 @@ func createScanTemplate(ctx context.Context, _ *mcp.CallToolRequest, input creat
 	case input.TemplateJSON != "":
 		tmpl = &models.ScanTemplate{}
 		if err := json.Unmarshal([]byte(input.TemplateJSON), tmpl); err != nil {
-			return errorResult("template_json 格式无效", err)
+			return errorResult("template_json 형식이 유효하지 않습니다", err)
 		}
 		if tmpl.Name == "" {
 			tmpl.Name = input.Name
@@ -359,17 +359,17 @@ func createScanTemplate(ctx context.Context, _ *mcp.CallToolRequest, input creat
 	}
 
 	if tmpl.Name == "" {
-		return errorResult("模板名称不能为空", nil)
+		return errorResult("템플릿 이름은 비워 둘 수 없습니다", nil)
 	}
 
 	id, err := d.templateService.Save(ctx, "", tmpl)
 	if err != nil {
-		return errorResult("创建模板失败", err)
+		return errorResult("템플릿 생성 실패", err)
 	}
-	return jsonToolResult(ginH{"success": true, "id": id, "message": "模板创建成功，可用于 create_scan_task 的 template 参数"})
+	return jsonToolResult(ginH{"success": true, "id": id, "message": "템플릿 생성 성공, create_scan_task의 template 파라미터에 사용할 수 있습니다"})
 }
 
-// buildTemplateFromModules 根据「模块->插件hash列表」组装扫描模板，并自动回填插件默认参数
+// buildTemplateFromModules "모듈->플러그인 hash 목록"으로 스캔 템플릿을 구성하고 플러그인 기본 파라미터를 자동으로 채움
 func buildTemplateFromModules(ctx context.Context, input createScanTemplateInput) (*models.ScanTemplate, error) {
 	validModule := make(map[string]bool, len(constants.PLUGINSMODULES))
 	for _, m := range constants.PLUGINSMODULES {
@@ -383,7 +383,7 @@ func buildTemplateFromModules(ctx context.Context, input createScanTemplateInput
 
 	for module, hashes := range input.Modules {
 		if !validModule[module] {
-			return nil, fmt.Errorf("无效的模块名: %s（用 list_plugin_modules 获取合法模块）", module)
+			return nil, fmt.Errorf("유효하지 않은 모듈명: %s (list_plugin_modules로 유효한 모듈 조회)", module)
 		}
 		if len(hashes) == 0 {
 			continue
@@ -392,7 +392,7 @@ func buildTemplateFromModules(ctx context.Context, input createScanTemplateInput
 
 		modParams := map[string]string{}
 		for _, hash := range hashes {
-			// 优先使用调用方提供的参数覆盖
+			// 호출자가 제공한 파라미터 재정의를 우선 사용
 			if input.Parameters != nil {
 				if mp, ok := input.Parameters[module]; ok {
 					if v, ok := mp[hash]; ok {
@@ -401,13 +401,13 @@ func buildTemplateFromModules(ctx context.Context, input createScanTemplateInput
 					}
 				}
 			}
-			// 否则回填插件默认参数
+			// 그렇지 않으면 플러그인 기본 파라미터로 채움
 			plg, err := d.pluginService.GetPluginByHash(ctx, hash)
 			if err != nil || plg == nil {
-				return nil, fmt.Errorf("插件 hash 不存在: %s（模块 %s）", hash, module)
+				return nil, fmt.Errorf("플러그인 hash가 존재하지 않습니다: %s (모듈 %s)", hash, module)
 			}
 			if plg.Module != module {
-				return nil, fmt.Errorf("插件 %s(hash=%s) 属于模块 %s，不能放入模块 %s", plg.Name, hash, plg.Module, module)
+				return nil, fmt.Errorf("플러그인 %s(hash=%s)는 모듈 %s에 속하므로 모듈 %s에 넣을 수 없습니다", plg.Name, hash, plg.Module, module)
 			}
 			modParams[hash] = plg.Parameter
 		}
@@ -425,50 +425,50 @@ func buildTemplateFromModules(ctx context.Context, input createScanTemplateInput
 
 	data, err := json.Marshal(templateMap)
 	if err != nil {
-		return nil, fmt.Errorf("组装模板失败: %w", err)
+		return nil, fmt.Errorf("템플릿 구성 실패: %w", err)
 	}
 	tmpl := &models.ScanTemplate{}
 	if err := json.Unmarshal(data, tmpl); err != nil {
-		return nil, fmt.Errorf("组装模板失败: %w", err)
+		return nil, fmt.Errorf("템플릿 구성 실패: %w", err)
 	}
 	return tmpl, nil
 }
 
 type createScanTaskInput struct {
-	Name           string              `json:"name" jsonschema:"任务名称，必填，不可重复"`
-	Target         string              `json:"target,omitempty" jsonschema:"扫描目标，targetSource 为 general 时必填，多行或逗号分隔"`
-	Node           []string            `json:"node" jsonschema:"执行扫描的节点名称列表，必填"`
-	Template       string              `json:"template,omitempty" jsonschema:"扫描模板 ObjectID，必填才能执行扫描"`
-	AllNode        bool                `json:"allNode,omitempty" jsonschema:"是否自动加入全部在线节点"`
-	Ignore         string              `json:"ignore,omitempty" jsonschema:"忽略目标列表，格式同 target"`
-	Duplicates     string              `json:"duplicates,omitempty" jsonschema:"去重策略，如 None"`
-	Project        []string            `json:"project,omitempty" jsonschema:"关联项目 ObjectID 列表，targetSource 为 project 时必填"`
-	TargetSource   string              `json:"targetSource,omitempty" jsonschema:"目标来源，可选 general project asset RootDomain subdomain UrlScan 及对应 Source 后缀，默认 general，详见工具 description"`
-	TargetTp       string              `json:"targetTp,omitempty" jsonschema:"Source 来源时的选取方式，search 或 select"`
-	Search         string              `json:"search,omitempty" jsonschema:"从资产库筛选目标的 search 表达式，语法同 list_assets，详见工具 description"`
-	Filter         map[string][]string `json:"filter,omitempty" jsonschema:"精确过滤，与 search 可组合，filter.project 为项目 ObjectID"`
-	TargetNumber   int                 `json:"targetNumber,omitempty" jsonschema:"search 模式下目标数量上限，0 表示不限制"`
-	TargetIds      []string            `json:"targetIds,omitempty" jsonschema:"select 模式下选中的资产 ObjectID 列表"`
-	BindProject    string              `json:"bindProject,omitempty" jsonschema:"绑定项目 ObjectID，扫描结果归属"`
-	ScheduledTasks bool                `json:"scheduledTasks,omitempty" jsonschema:"是否创建为计划任务"`
-	Hour           int                 `json:"hour,omitempty" jsonschema:"计划任务间隔-小时"`
-	Minute         int                 `json:"minute,omitempty" jsonschema:"计划任务间隔-分钟"`
-	Day            int                 `json:"day,omitempty" jsonschema:"计划任务间隔-天"`
-	Week           int                 `json:"week,omitempty" jsonschema:"计划任务间隔-周（weekly 周期）"`
-	CycleType      string              `json:"cycleType,omitempty" jsonschema:"周期类型，如 nhours daily weekly"`
+	Name           string              `json:"name" jsonschema:"작업 이름, 필수, 중복 불가"`
+	Target         string              `json:"target,omitempty" jsonschema:"스캔 대상, targetSource가 general일 때 필수, 여러 줄 또는 쉼표로 구분"`
+	Node           []string            `json:"node" jsonschema:"스캔을 실행할 노드 이름 목록, 필수"`
+	Template       string              `json:"template,omitempty" jsonschema:"스캔 템플릿 ObjectID, 스캔 실행에 필수"`
+	AllNode        bool                `json:"allNode,omitempty" jsonschema:"모든 온라인 노드 자동 추가 여부"`
+	Ignore         string              `json:"ignore,omitempty" jsonschema:"무시할 대상 목록, 형식은 target과 동일"`
+	Duplicates     string              `json:"duplicates,omitempty" jsonschema:"중복 제거 전략, 예: None"`
+	Project        []string            `json:"project,omitempty" jsonschema:"연결할 프로젝트 ObjectID 목록, targetSource가 project일 때 필수"`
+	TargetSource   string              `json:"targetSource,omitempty" jsonschema:"대상 출처, general project asset RootDomain subdomain UrlScan 및 해당 Source 접미사 중 선택, 기본값 general, 자세한 내용은 도구 description 참조"`
+	TargetTp       string              `json:"targetTp,omitempty" jsonschema:"Source 출처일 때의 선택 방식, search 또는 select"`
+	Search         string              `json:"search,omitempty" jsonschema:"자산 저장소에서 대상을 필터링하는 search 표현식, 문법은 list_assets와 동일, 자세한 내용은 도구 description 참조"`
+	Filter         map[string][]string `json:"filter,omitempty" jsonschema:"정확 필터, search와 조합 가능, filter.project는 프로젝트 ObjectID"`
+	TargetNumber   int                 `json:"targetNumber,omitempty" jsonschema:"search 모드에서 대상 수 상한, 0은 제한 없음"`
+	TargetIds      []string            `json:"targetIds,omitempty" jsonschema:"select 모드에서 선택된 자산 ObjectID 목록"`
+	BindProject    string              `json:"bindProject,omitempty" jsonschema:"바인딩할 프로젝트 ObjectID, 스캔 결과 귀속 대상"`
+	ScheduledTasks bool                `json:"scheduledTasks,omitempty" jsonschema:"예약 작업으로 생성할지 여부"`
+	Hour           int                 `json:"hour,omitempty" jsonschema:"예약 작업 간격-시간"`
+	Minute         int                 `json:"minute,omitempty" jsonschema:"예약 작업 간격-분"`
+	Day            int                 `json:"day,omitempty" jsonschema:"예약 작업 간격-일"`
+	Week           int                 `json:"week,omitempty" jsonschema:"예약 작업 간격-주 (weekly 주기)"`
+	CycleType      string              `json:"cycleType,omitempty" jsonschema:"주기 유형, 예: nhours daily weekly"`
 }
 
 func createScanTask(ctx context.Context, _ *mcp.CallToolRequest, input createScanTaskInput) (*mcp.CallToolResult, any, error) {
 	if input.Name == "" || len(input.Node) == 0 {
-		return errorResult("name 和 node 不能为空", nil)
+		return errorResult("name과 node는 비워 둘 수 없습니다", nil)
 	}
 	c := ginContext(ctx)
 	exists, err := d.taskService.CheckTaskNameExists(c, input.Name)
 	if err != nil {
-		return errorResult("检查任务名失败", err)
+		return errorResult("작업 이름 확인 실패", err)
 	}
 	if exists {
-		return errorResult("任务名已存在", nil)
+		return errorResult("작업 이름이 이미 존재합니다", nil)
 	}
 
 	targetSource := input.TargetSource
@@ -511,26 +511,26 @@ func createScanTask(ctx context.Context, _ *mcp.CallToolRequest, input createSca
 	}
 	taskID, err := d.taskCommonService.Insert(ctx, taskModel)
 	if err != nil {
-		return errorResult("创建扫描任务失败", err)
+		return errorResult("스캔 작업 생성 실패", err)
 	}
 	return jsonToolResult(ginH{"success": true, "id": taskID})
 }
 
 type listAssetsInput struct {
-	AssetType        string              `json:"asset_type" jsonschema:"资产类型，必填。如 asset、RootDomain、subdomain、app、mp、UrlScan、SensitiveResult、DirScanResult、crawler、vulnerability、PageMonitoring、IPAsset、SubdomainTakerResult"`
-	PageIndex        int                 `json:"pageIndex,omitempty" jsonschema:"页码，从 1 开始，默认 1"`
-	PageSize         int                 `json:"pageSize,omitempty" jsonschema:"每页条数，默认 20"`
-	SearchExpression string              `json:"search,omitempty" jsonschema:"搜索表达式，非 SQL，语法详见工具 description"`
-	Filter           map[string][]string `json:"filter,omitempty" jsonschema:"精确过滤 JSON，与 search 可组合。filter.project 为项目 ObjectID（list_projects 获取，非项目名）；filter.task 为任务名称。详见工具 description"`
-	Sort             map[string]string   `json:"sort,omitempty" jsonschema:"排序。仅 UrlScan/DirScanResult 支持 length：ascending 升序，其他值降序"`
-	Sid              string              `json:"sid,omitempty" jsonschema:"敏感信息规则名称，仅 asset_type 为 SensitiveResult 时有效"`
+	AssetType        string              `json:"asset_type" jsonschema:"자산 유형, 필수. 예: asset, RootDomain, subdomain, app, mp, UrlScan, SensitiveResult, DirScanResult, crawler, vulnerability, PageMonitoring, IPAsset, SubdomainTakerResult"`
+	PageIndex        int                 `json:"pageIndex,omitempty" jsonschema:"페이지 번호, 1부터 시작, 기본값 1"`
+	PageSize         int                 `json:"pageSize,omitempty" jsonschema:"페이지당 항목 수, 기본값 20"`
+	SearchExpression string              `json:"search,omitempty" jsonschema:"검색 표현식, SQL 아님, 문법은 도구 description 참조"`
+	Filter           map[string][]string `json:"filter,omitempty" jsonschema:"정확 필터 JSON, search와 조합 가능. filter.project는 프로젝트 ObjectID(list_projects로 조회, 프로젝트 이름 아님); filter.task는 작업 이름. 자세한 내용은 도구 description 참조"`
+	Sort             map[string]string   `json:"sort,omitempty" jsonschema:"정렬. UrlScan/DirScanResult만 length 지원: ascending은 오름차순, 그 외 값은 내림차순"`
+	Sid              string              `json:"sid,omitempty" jsonschema:"민감 정보 규칙 이름, asset_type이 SensitiveResult일 때만 유효"`
 }
 
 type countAssetsInput struct {
-	AssetType        string              `json:"asset_type" jsonschema:"资产类型，必填。取值同 list_assets"`
-	SearchExpression string              `json:"search,omitempty" jsonschema:"搜索表达式，语法同 list_assets"`
-	Filter           map[string][]string `json:"filter,omitempty" jsonschema:"精确过滤 JSON，语法同 list_assets；filter.project 为项目 ObjectID"`
-	Sid              string              `json:"sid,omitempty" jsonschema:"敏感信息规则名称，仅 asset_type 为 SensitiveResult 时有效"`
+	AssetType        string              `json:"asset_type" jsonschema:"자산 유형, 필수. 값은 list_assets와 동일"`
+	SearchExpression string              `json:"search,omitempty" jsonschema:"검색 표현식, 문법은 list_assets와 동일"`
+	Filter           map[string][]string `json:"filter,omitempty" jsonschema:"정확 필터 JSON, 문법은 list_assets와 동일; filter.project는 프로젝트 ObjectID"`
+	Sid              string              `json:"sid,omitempty" jsonschema:"민감 정보 규칙 이름, asset_type이 SensitiveResult일 때만 유효"`
 }
 
 func countAssets(ctx context.Context, _ *mcp.CallToolRequest, input countAssetsInput) (*mcp.CallToolResult, any, error) {
@@ -558,7 +558,7 @@ func countAssets(ctx context.Context, _ *mcp.CallToolRequest, input countAssetsI
 
 	total, err := d.commonService.TotalData(ctx, &query)
 	if err != nil {
-		return errorResult("统计资产数量失败", err)
+		return errorResult("자산 수 집계 실패", err)
 	}
 	return jsonToolResult(ginH{"total": total})
 }
@@ -598,19 +598,19 @@ func listAssets(ctx context.Context, _ *mcp.CallToolRequest, input listAssetsInp
 	c := ginContext(ctx)
 	data, err := queryAssets(ctx, c, index, query)
 	if err != nil {
-		return errorResult("查询资产失败", err)
+		return errorResult("자산 조회 실패", err)
 	}
 	return jsonToolResult(data)
 }
 
 type getAssetDetailInput struct {
-	AssetType string `json:"asset_type" jsonschema:"资产类型。详情查询支持 asset 或 vulnerability"`
-	ID        string `json:"id" jsonschema:"资产 MongoDB ObjectID；vulnerability 类型传 hash 值"`
+	AssetType string `json:"asset_type" jsonschema:"자산 유형. 상세 조회는 asset 또는 vulnerability 지원"`
+	ID        string `json:"id" jsonschema:"자산 MongoDB ObjectID; vulnerability 유형은 hash 값 전달"`
 }
 
 func getAssetDetail(ctx context.Context, _ *mcp.CallToolRequest, input getAssetDetailInput) (*mcp.CallToolResult, any, error) {
 	if input.ID == "" {
-		return errorResult("id 不能为空", nil)
+		return errorResult("id는 비워 둘 수 없습니다", nil)
 	}
 	c := ginContext(ctx)
 	index, err := normalizeAssetIndex(input.AssetType)
@@ -622,27 +622,27 @@ func getAssetDetail(ctx context.Context, _ *mcp.CallToolRequest, input getAssetD
 	case "asset":
 		result, err := d.assetService.GetAssetByID(c, input.ID)
 		if err != nil {
-			return errorResult("获取资产详情失败", err)
+			return errorResult("자산 상세 정보 조회 실패", err)
 		}
 		if result == nil {
-			return errorResult("资产不存在", nil)
+			return errorResult("자산이 존재하지 않습니다", nil)
 		}
 		return jsonToolResult(result)
 	case "vulnerability":
 		result, err := d.vulnService.GetVulnerabilityDetailByHash(c, input.ID)
 		if err != nil {
-			return errorResult("获取漏洞详情失败", err)
+			return errorResult("취약점 상세 정보 조회 실패", err)
 		}
 		return jsonToolResult(result)
 	default:
-		return errorResult("asset_type 仅支持 asset 或 vulnerability 的详情查询", nil)
+		return errorResult("asset_type은 asset 또는 vulnerability의 상세 조회만 지원합니다", nil)
 	}
 }
 
 type addAssetTagInput struct {
-	AssetType string `json:"asset_type" jsonschema:"资产类型，同 list_assets 的 asset_type"`
-	ID        string `json:"id" jsonschema:"资产 MongoDB ObjectID"`
-	Tag       string `json:"tag" jsonschema:"要添加的标签名称"`
+	AssetType string `json:"asset_type" jsonschema:"자산 유형, list_assets의 asset_type과 동일"`
+	ID        string `json:"id" jsonschema:"자산 MongoDB ObjectID"`
+	Tag       string `json:"tag" jsonschema:"추가할 태그 이름"`
 }
 
 func addAssetTag(ctx context.Context, _ *mcp.CallToolRequest, input addAssetTagInput) (*mcp.CallToolResult, any, error) {
@@ -651,24 +651,24 @@ func addAssetTag(ctx context.Context, _ *mcp.CallToolRequest, input addAssetTagI
 		return errorResult(err.Error(), nil)
 	}
 	if input.ID == "" || input.Tag == "" {
-		return errorResult("id 和 tag 不能为空", nil)
+		return errorResult("id와 tag는 비워 둘 수 없습니다", nil)
 	}
 	c := ginContext(ctx)
 	req := &models.TagRequest{Type: index, ID: input.ID, Tag: input.Tag}
 	if err := d.commonService.AddTag(c, req); err != nil {
-		return errorResult("添加标签失败", err)
+		return errorResult("태그 추가 실패", err)
 	}
 	return jsonToolResult(ginH{"success": true})
 }
 
 type listNodesInput struct {
-	OnlineOnly bool `json:"online_only,omitempty" jsonschema:"true 时仅返回在线节点，默认 false 返回全部"`
+	OnlineOnly bool `json:"online_only,omitempty" jsonschema:"true이면 온라인 노드만 반환, 기본값 false는 전체 반환"`
 }
 
 func listNodes(ctx context.Context, _ *mcp.CallToolRequest, input listNodesInput) (*mcp.CallToolResult, any, error) {
 	result, err := d.nodeService.GetNodeData(ctx, input.OnlineOnly)
 	if err != nil {
-		return errorResult("获取节点列表失败", err)
+		return errorResult("노드 목록 조회 실패", err)
 	}
 	return jsonToolResult(ginH{"list": result})
 }
@@ -678,8 +678,8 @@ func listPluginModules(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*
 }
 
 type listPluginsInput struct {
-	Module string `json:"module,omitempty" jsonschema:"按模块名过滤，留空返回全部扫描插件。模块名用 list_plugin_modules 获取"`
-	Search string `json:"search,omitempty" jsonschema:"按插件名称模糊搜索（仅在未指定 module 时生效）"`
+	Module string `json:"module,omitempty" jsonschema:"모듈명으로 필터링, 비워 두면 전체 스캔 플러그인 반환. 모듈명은 list_plugin_modules로 조회"`
+	Search string `json:"search,omitempty" jsonschema:"플러그인 이름 퍼지 검색 (module 미지정 시에만 적용)"`
 }
 
 type pluginBrief struct {
@@ -694,7 +694,7 @@ type pluginBrief struct {
 func toPluginBriefs(plugins []models.Plugin) []pluginBrief {
 	briefs := make([]pluginBrief, 0, len(plugins))
 	for _, p := range plugins {
-		// 跳过服务端插件，它们不参与扫描流水线
+		// 서버 측 플러그인은 스캔 파이프라인에 참여하지 않으므로 건너뜀
 		if p.Type == "server" {
 			continue
 		}
@@ -716,7 +716,7 @@ func listPlugins(ctx context.Context, _ *mcp.CallToolRequest, input listPluginsI
 	if input.Module != "" {
 		plugins, err := d.pluginService.ListByModule(c, input.Module)
 		if err != nil {
-			return errorResult("获取插件列表失败", err)
+			return errorResult("플러그인 목록 조회 실패", err)
 		}
 		return jsonToolResult(ginH{"list": toPluginBriefs(plugins)})
 	}
@@ -727,7 +727,7 @@ func listPlugins(ctx context.Context, _ *mcp.CallToolRequest, input listPluginsI
 		Search:    input.Search,
 	})
 	if err != nil {
-		return errorResult("获取插件列表失败", err)
+		return errorResult("플러그인 목록 조회 실패", err)
 	}
 	return jsonToolResult(ginH{"list": toPluginBriefs(resp.List), "total": resp.Total})
 }
@@ -767,7 +767,7 @@ func queryAssets(ctx context.Context, c *gin.Context, index string, query models
 	case "SubdomainTakerResult":
 		return querySubdomainTaker(ctx, query)
 	default:
-		return nil, fmt.Errorf("不支持的资产类型: %s", index)
+		return nil, fmt.Errorf("지원되지 않는 자산 유형: %s", index)
 	}
 }
 
@@ -780,7 +780,7 @@ func querySubdomainTaker(ctx context.Context, query models.SearchRequest) (any, 
 func normalizeAssetIndex(assetType string) (string, error) {
 	assetType = strings.TrimSpace(assetType)
 	if assetType == "" {
-		return "", fmt.Errorf("asset_type 不能为空")
+		return "", fmt.Errorf("asset_type은 비워 둘 수 없습니다")
 	}
 	aliases := map[string]string{
 		"asset":                "asset",
@@ -820,7 +820,7 @@ func normalizeAssetIndex(assetType string) (string, error) {
 	if _, ok := aliases[strings.ReplaceAll(key, "-", "_")]; ok {
 		return aliases[strings.ReplaceAll(key, "-", "_")], nil
 	}
-	// 允许直接传 MongoDB 集合名
+	// MongoDB 컬렉션 이름을 직접 전달하는 것도 허용
 	valid := []string{"asset", "RootDomain", "subdomain", "app", "mp", "UrlScan",
 		"SensitiveResult", "DirScanResult", "crawler", "vulnerability",
 		"PageMonitoring", "IPAsset", "SubdomainTakerResult"}
@@ -829,7 +829,7 @@ func normalizeAssetIndex(assetType string) (string, error) {
 			return v, nil
 		}
 	}
-	return "", fmt.Errorf("不支持的 asset_type: %s", assetType)
+	return "", fmt.Errorf("지원되지 않는 asset_type: %s", assetType)
 }
 
 type ginH map[string]any
