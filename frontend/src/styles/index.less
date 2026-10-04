@@ -5,3 +5,15 @@
 .el-popup-parent--hidden {
   width: 100% !important;
 }
+
+// 버튼/라벨 칸을 내용 길이에 맞춤 (번역 문구가 길어져도 겹치지 않도록)
+.el-col.col-auto {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+  margin-right: 8px;
+
+  .el-text {
+    white-space: nowrap;
+  }
+}

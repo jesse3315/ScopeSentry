@@ -263,7 +263,7 @@ const closepluginDialogVisible = () => {
       </ElCol>
       <ElCol :span="5" style="position: relative; left: 16px">
         <ElButton type="primary" :icon="searchicon" style="height: 100%" @click="handleSearch"
-          >Search</ElButton
+          >{{ t('common.search') }}</ElButton
         >
       </ElCol>
     </ElRow> -->

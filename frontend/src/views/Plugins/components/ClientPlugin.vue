@@ -482,7 +482,7 @@ defineExpose({
 <template>
   <ContentWrap>
     <ElRow>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <ElText class="mx-1" style="position: relative; top: 8px">{{ t('plugin.name') }}:</ElText>
       </ElCol>
       <ElCol :span="5">
@@ -490,10 +490,10 @@ defineExpose({
       </ElCol>
       <ElCol :span="5" style="position: relative; left: 16px">
         <ElButton type="primary" :icon="searchicon" style="height: 100%" @click="handleSearch"
-          >Search</ElButton
+          >{{ t('common.search') }}</ElButton
         >
       </ElCol>
-      <ElCol :span="1" style="position: relative; left: 32px">
+      <ElCol :span="1" class="col-auto" style="position: relative; left: 32px">
         <ElText class="mx-1" style="position: relative; top: 8px">{{ t('plugin.key') }}:</ElText>
       </ElCol>
       <ElCol :span="5" style="position: relative; left: 32px">

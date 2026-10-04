@@ -225,13 +225,13 @@ const downloadFile = async (id, name) => {
 
 <template>
   <ContentWrap>
-    <ElRow :gutter="60">
-      <ElCol :span="1">
+    <ElRow :gutter="12">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <ElButton type="primary" @click="openCreateDialog">{{ t('common.new') }}</ElButton>
         </div>
       </ElCol>
-      <ElCol :span="1">
+      <ElCol :span="1" class="col-auto">
         <div class="mb-10px">
           <BaseButton type="danger" :loading="delLoading" @click="confirmDelete">
             {{ t('common.delete') }}
