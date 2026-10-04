@@ -31,7 +31,7 @@ const props = defineProps<{
 const searchKeywordsData = [
   {
     keyword: 'name',
-    example: 'domain="百度"',
+    example: 'domain="example"',
     explain: t('searchHelp.name')
   },
   {
