@@ -412,32 +412,32 @@
   <!-- 7 -->
   <section class="card" id="s7">
     <h2><span class="num">7</span> 결론</h2>
-    <p>이번 세션은 ARTEX가 <strong>단일 대화 지시만으로 침투 테스트 작업을 자율 생성·실행·추적하고, 라이브 재검증을 거쳐 발견을
-    플랫폼에 정식 등록(report_finding 15건)하기까지 전 파이프라인을 엔드투엔드로 완주</strong>함을 확인했습니다. 특히 유료
-    <strong>GLM 5.3 Flash</strong>로 수행하여 <strong>레이트리밋 중단 없이</strong> 작업 생성·상속·힌트 인계·워커 자동 등록·기획자 실시간
-    교정 훅·상세보고서 등록이 모두 정상 동작했고, Critical 3건 포함 <strong>15건을 confirmed 상태로 등록</strong>했습니다.</p>
-    <div class="callout ok">무료 티어에서 관측됐던 레이트리밋 중단은 <b>초기 테스트의 일시적 현상</b>이었으며, 유료 모델 전환으로 해소됨을
-    이번 완주로 실증했습니다. 관찰된 <code>update_finding_report</code> id 규격 불일치만 개선 과제로 남습니다.</div>
+    <p>이번 테스트에서 ARTEX는 <strong>"DVWA를 해킹하라"는 한 마디 지시만으로</strong> 다음을 스스로 해냈습니다.</p>
+    <ul>
+      <li>작업을 만들고, 워커를 돌리고, 진행 상황을 추적</li>
+      <li>이전에 찾아둔 취약점을 <strong>직접 다시 확인</strong>(라이브 재검증)</li>
+      <li>찾은 취약점 <strong>15건을 플랫폼에 정식 등록</strong>(상세보고서까지)</li>
+    </ul>
+    <p>즉 <strong>처음부터 끝까지 사람 손 없이 한 번에 완주</strong>했습니다. 이번엔 유료 <strong>GLM 5.3 Flash</strong>를 썼기 때문에
+    (무료 버전에서 겪던) <strong>요청 제한에 걸려 멈추는 일 없이</strong> 전 과정이 매끄럽게 돌아갔습니다. 그 결과 Critical 3건을 포함한
+    <strong>15건을 모두 확정 등록</strong>했고, 남은 과제는 <code>update_finding_report</code>의 id 규격 불일치 한 가지뿐입니다.</p>
 
-    <h3 style="margin-top:24px"><span class="step">▸</span> 방어 관점 — 관제센터는 ARTEX/LLM 해킹을 어떤 특징으로 탐지하는가</h3>
-    <p>공격 과정에서 드러난 ARTEX의 행위·트래픽을 방어(SOC) 시각으로 뒤집어 보면, <strong>취약점이 아니라 "공격 주체(자율 에이전트)"를 탐지</strong>해야 합니다.
-    LLM이 응답을 읽고 다음 수를 조립하는 이상 페이로드 시그니처는 빗나가기 쉬우며, <strong>아키텍처가 강제하는 구조적 지문</strong>이 더 견고한 단서입니다.
-    핵심 특징을 <strong>내구성(공격자가 바꾸기 어려운 정도)</strong> 순으로 정리하면:</p>
+    <h3 style="margin-top:24px"><span class="step">▸</span> 방어 관점 — 관제센터는 이런 공격을 어떻게 알아챌까</h3>
+    <p>ARTEX 같은 <strong>AI 자율 해킹 도구</strong>는 "공격에 쓴 문구(페이로드)"만 보고 잡기 어렵습니다. 공격 방식이 매번 바뀌기 때문입니다.
+    그래서 <strong>"무엇으로 공격했나"보다 "누가(어떤 도구가) 공격하나"</strong>를 보는 편이 낫습니다. 관제센터가 눈여겨볼 만한 특징을,
+    <strong>공격자가 바꾸기 어려운 순서</strong>로 쉽게 풀면 다음과 같습니다.</p>
     <div class="tbl-scroll"><table>
-      <thead><tr><th>탐지 특징</th><th>관제가 무엇을 보는가</th><th>내구성</th></tr></thead>
+      <thead><tr><th>눈여겨볼 특징</th><th>쉽게 말하면</th><th>바꾸기 어려움</th></tr></thead>
       <tbody>
-        <tr><td><strong>적응형 다단계 체인</strong></td><td>민감·대용량 응답 → 동일 IP의 <strong>논리적 후속(인증 성공·권한 상승)</strong>이 초~분 내 발생 — <strong>모델 등급과 무관</strong>한 LLM 고유의 자율 체인</td><td><span class="pill crit">견고 · Critical</span></td></tr>
-        <tr><td><strong>단일 프록시 집중 egress</strong></td><td>한 소스 IP에서 정찰·인증·주입·업로드 등 <strong>서로 다른 벡터 ≥ 3종</strong>이 한 세션창에 혼재</td><td><span class="pill high">중간</span></td></tr>
-        <tr><td><strong>혼재된 클라이언트 정체성</strong></td><td>UA 리터럴 <code>artex-enrich/1.0</code>, Go·curl·모바일 Chromium의 <strong>UA·JA3 혼재</strong>, <strong>모바일 UA ↔ 데이터센터 IP 불일치</strong></td><td><span class="pill med">중간·취약</span></td></tr>
-        <tr><td><strong>저소음·고정밀</strong></td><td>요청 수는 적으나 <strong>민감 엔드포인트 적중률이 비정상적으로 높은</strong> 세션</td><td><span class="pill high">중간</span></td></tr>
-        <tr><td><strong>LLM 호출 리듬</strong></td><td>tool-call마다 추론 지연이 끼는 버스트+갭(스캐너의 연속 폭주와 구별). 단 <strong>수 분 침묵은 모델 쿼터 한도에 좌우</strong>되어 유료 모델에서는 약해짐</td><td><span class="pill med">가변</span></td></tr>
+        <tr><td><strong>대화하듯 이어지는 공격</strong></td><td>서버 응답을 읽고 곧바로 그 정보로 다음 공격을 함(예: 비밀번호를 빼내자마자 그 계정으로 로그인). 사람·일반 스캐너가 흉내 내기 가장 어려운 AI만의 특징</td><td><span class="pill crit">매우 어려움</span></td></tr>
+        <tr><td><strong>한 곳에서 여러 공격</strong></td><td>같은 IP 하나에서 정찰·로그인·주입·업로드가 짧은 시간에 뒤섞여 나옴</td><td><span class="pill high">보통</span></td></tr>
+        <tr><td><strong>정체가 뒤섞임</strong></td><td>같은 IP가 여러 접속 도구를 번갈아 쓰거나, 모바일인 척하는데 실제론 데이터센터에서 접속</td><td><span class="pill med">보통~쉬움</span></td></tr>
+        <tr><td><strong>조용하지만 정확</strong></td><td>요청은 몇 번 안 되는데 민감한 곳만 콕 집어 성공</td><td><span class="pill high">보통</span></td></tr>
+        <tr><td><strong>AI 특유의 리듬</strong></td><td>생각(추론)하느라 요청 사이에 짧은 멈춤이 생김</td><td><span class="pill med">상황에 따라</span></td></tr>
       </tbody>
     </table></div>
-    <div class="callout warn"><b>유의 — 레이트 리밋은 '만능 차단책'이 아니다</b> — 본 세션이 바로 그 증거입니다. <strong>유료 GLM 5.3 Flash에서는
-    레이트리밋 중단 없이 공격이 완주</strong>되었습니다. 즉 방어측의 속도 제한은 공격자의 토큰 비용·소요 시간을 끌어올리는
-    <strong>심층 방어의 한 겹일 뿐, 결정적 차단책이 아닙니다.</strong> 모델 등급과 무관하게 남는 가장 견고한 단서는
-    <strong>"민감 응답 → 논리적 후속"의 적응형 체인(의미 상관)</strong>이며, 탐지는 여기에 다지표 상관과 인증 강화·자격증명 위생 같은
-    심층 방어를 더해 구성해야 합니다. 세부 탐지룰·SIEM 상관·플레이북은 별도 문서 <em>「ARTEX 에이전트 탐지·관제센터 대응방안」</em>에 정리되어 있습니다.</div>
+    <div class="callout ok"><b>한 줄 요약</b> — 이런 AI 공격은 <em>공격 문구</em>가 아니라 <strong>행동 패턴</strong>으로 잡는 것이 핵심입니다.
+    그중에서도 <strong>"서버 응답을 읽고 바로 다음 수를 두는" 대화형 공격 흐름</strong>이 가장 믿을 만한 단서입니다.</div>
 
     <div class="verdict" style="margin-top:14px">
       <span class="chip ok">종합 판정 : 전 파이프라인 엔드투엔드 완주</span>
