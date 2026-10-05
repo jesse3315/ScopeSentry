@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARTEX DVWA 모의해킹 — 발표 슬라이드</title>
+<style>
+  :root{
+    --bg:#0c0b14; --bg2:#13111f; --panel:#1a1830; --panel2:#211e3a;
+    --border:#312c52; --text:#ece9ff; --muted:#a49fce; --dim:#7b76a3;
+    --accent:#8b7bff; --accent2:#b9adff; --accent-soft:rgba(139,123,255,.16);
+    --ok:#3ddc97; --crit:#ff6b7a; --high:#ffa24d; --med:#6ea8ff; --low:#9aa3c7;
+    --code:#0a0912;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:radial-gradient(130% 120% at 85% -10%,#1b1636 0%,var(--bg) 55%);
+    color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",Roboto,Arial,sans-serif;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased;}
+
+  /* 16:9 무대 — 컨테이너 쿼리 단위로 전체 스케일 */
+  .stage{position:relative;container-type:size;
+    width:min(100vw, calc(100vh * 16 / 9));
+    height:min(100vh, calc(100vw * 9 / 16));
+    background:var(--bg2);overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.6);}
+
+  .slide{position:absolute;inset:0;padding:5.4cqh 6cqw;display:flex;flex-direction:column;
+    opacity:0;visibility:hidden;transition:opacity .35s ease;pointer-events:none;}
+  .slide.active{opacity:1;visibility:visible;pointer-events:auto;}
+
+  /* 상단 러닝 헤더 */
+  .shead{display:flex;align-items:center;justify-content:space-between;
+    font-size:1.5cqh;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+    border-bottom:1px solid var(--border);padding-bottom:1.6cqh;margin-bottom:3cqh;font-weight:700;}
+  .shead .tag{color:var(--accent2);}
+  .kick{font-size:1.7cqh;letter-spacing:.2em;text-transform:uppercase;color:var(--accent2);font-weight:800;margin-bottom:1.6cqh;}
+  h1{font-size:5.6cqh;line-height:1.18;font-weight:800;letter-spacing:-.01em;}
+  h2{font-size:4cqh;line-height:1.2;font-weight:800;letter-spacing:-.01em;margin-bottom:2.4cqh;display:flex;gap:.5em;align-items:baseline;}
+  h2 .n{color:var(--accent);font-size:3cqh;font-weight:800;}
+  .lead{font-size:2.3cqh;line-height:1.6;color:var(--muted);max-width:78%;}
+  b,strong{color:#fff;font-weight:800;}
+  .accent{color:var(--accent2);}
+  code{font-family:"SFMono-Regular",Consolas,Menlo,monospace;background:var(--code);
+    border:1px solid var(--border);border-radius:.4em;padding:.05em .4em;font-size:.86em;color:#d9d2ff;}
+
+  /* 타이틀 슬라이드 */
+  .title-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;}
+  .title-wrap h1{max-width:90%;}
+  .title-sub{margin-top:3cqh;font-size:2.3cqh;line-height:1.65;color:var(--muted);max-width:82%;}
+  .title-meta{margin-top:auto;display:flex;gap:2.4cqw;flex-wrap:wrap;font-size:1.7cqh;color:var(--dim);
+    border-top:1px solid var(--border);padding-top:2.4cqh;}
+  .title-meta b{color:var(--accent2);font-weight:800;}
+
+  .body{flex:1;min-height:0;display:flex;flex-direction:column;gap:2.4cqh;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:3cqw;flex:1;min-height:0;}
+
+  /* KPI */
+  .kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:1.4cqw;}
+  .kpi .box{background:var(--panel);border:1px solid var(--border);border-radius:1.4cqh;padding:2.2cqh 1.6cqw;}
+  .kpi .box.ok{border-color:rgba(61,220,151,.45);} .kpi .box.crit{border-color:rgba(255,107,122,.45);}
+  .kpi .v{font-size:4.6cqh;font-weight:800;line-height:1;}
+  .kpi .v.g{color:var(--ok);} .kpi .v.c{color:var(--crit);}
+  .kpi .k{font-size:1.6cqh;color:var(--muted);margin-top:.9cqh;font-weight:600;}
+
+  /* 정보 리스트 */
+  .facts{display:flex;flex-direction:column;gap:1.5cqh;}
+  .facts .row{display:flex;gap:1.4cqw;font-size:2cqh;line-height:1.4;}
+  .facts .row .k{color:var(--muted);font-weight:700;min-width:11cqw;}
+  .facts .row .d{color:var(--text);}
+
+  /* 표 */
+  table{width:100%;border-collapse:collapse;font-size:1.8cqh;}
+  th,td{text-align:left;padding:1.25cqh 1.1cqw;border-bottom:1px solid var(--border);vertical-align:middle;}
+  thead th{color:var(--accent2);font-weight:800;font-size:1.55cqh;letter-spacing:.04em;text-transform:uppercase;
+    border-bottom:1.5px solid var(--accent);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.k{color:var(--muted);white-space:nowrap;font-weight:700;}
+  .mini td,.mini th{padding:.82cqh 1cqw;font-size:1.5cqh;}
+  .pill{display:inline-block;padding:.2em .7em;border-radius:2em;font-size:.82em;font-weight:800;white-space:nowrap;}
+  .pill.crit{background:rgba(255,107,122,.16);color:var(--crit);}
+  .pill.high{background:rgba(255,162,77,.16);color:var(--high);}
+  .pill.med{background:rgba(110,168,255,.16);color:var(--med);}
+  .pill.low{background:rgba(154,163,199,.16);color:var(--low);}
+  .ok-ic{color:var(--ok);font-weight:800;}
+
+  /* 단계 플로우 (수행 과정) */
+  .steps{display:flex;flex-direction:column;gap:1.5cqh;flex:1;justify-content:center;}
+  .step{display:flex;gap:1.6cqw;align-items:flex-start;background:var(--panel);border:1px solid var(--border);
+    border-left:.45cqw solid var(--accent);border-radius:1.2cqh;padding:1.8cqh 1.8cqw;}
+  .step .num{flex:0 0 auto;width:3.4cqh;height:3.4cqh;border-radius:50%;background:var(--accent);color:#1a1530;
+    font-weight:800;font-size:1.8cqh;display:flex;align-items:center;justify-content:center;margin-top:.2cqh;}
+  .step .t{font-size:2.05cqh;font-weight:800;margin-bottom:.5cqh;}
+  .step .d{font-size:1.7cqh;color:var(--muted);line-height:1.45;}
+  .step.reg{border-left-color:var(--ok);} .step.reg .num{background:var(--ok);}
+
+  /* 아키텍처 뷰 */
+  .arch{flex:1;display:flex;flex-direction:column;justify-content:center;gap:2.6cqh;}
+  .hub{border:1px dashed var(--border);border-radius:1.4cqh;padding:2.2cqh 1.8cqw;background:var(--panel);}
+  .hub .hl{font-size:1.6cqh;color:var(--accent2);font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.6cqh;}
+  .chips{display:flex;flex-wrap:wrap;gap:1cqh 1cqw;}
+  .chip{font-size:1.8cqh;font-weight:700;padding:.7cqh 1.3cqw;border-radius:2em;background:var(--accent-soft);
+    color:var(--accent2);border:1px solid var(--border);}
+  .chip.hub{background:var(--accent);color:#17122e;border-color:var(--accent);}
+  .flow{display:flex;align-items:stretch;gap:1cqw;}
+  .fnode{flex:1;background:var(--panel2);border:1.5px solid var(--border);border-radius:1.4cqh;padding:2.4cqh 1.6cqw;text-align:center;}
+  .fnode .fi{display:inline-flex;width:3.6cqh;height:3.6cqh;border-radius:50%;background:var(--accent);color:#17122e;
+    font-weight:800;font-size:1.9cqh;align-items:center;justify-content:center;margin-bottom:1.3cqh;}
+  .fnode b{display:block;font-size:2.1cqh;margin-bottom:.7cqh;}
+  .fnode span{display:block;font-size:1.65cqh;color:var(--muted);line-height:1.45;}
+  .fnode.reg{border-color:rgba(61,220,151,.5);} .fnode.reg .fi{background:var(--ok);}
+  .farrow{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 auto;color:var(--dim);
+    font-size:3cqh;font-weight:800;padding:0 .3cqw;}
+  .farrow small{font-size:1.3cqh;color:var(--dim);font-weight:700;}
+
+  .callout{background:var(--accent-soft);border:1px solid var(--border);border-left:.45cqw solid var(--accent);
+    border-radius:0 1.2cqh 1.2cqh 0;padding:1.9cqh 1.9cqw;font-size:1.95cqh;line-height:1.55;color:var(--text);}
+  .callout.ok{border-left-color:var(--ok);background:rgba(61,220,151,.1);}
+  .note{font-size:1.6cqh;color:var(--dim);line-height:1.5;}
+
+  .chainwrap{display:flex;flex-direction:column;gap:2.2cqh;}
+  .chain{background:var(--panel);border:1px solid var(--border);border-radius:1.3cqh;padding:2.2cqh 2cqw;}
+  .chain .ct{font-size:1.6cqh;color:var(--crit);font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:1.2cqh;}
+  .chain .seq{display:flex;flex-wrap:wrap;align-items:center;gap:.9cqw;font-size:1.95cqh;font-weight:700;}
+  .chain .seq .s{background:var(--panel2);border:1px solid var(--border);border-radius:.7cqh;padding:.7cqh 1.2cqw;}
+  .chain .seq .ar{color:var(--accent);font-weight:800;}
+
+  .score{display:grid;grid-template-columns:repeat(2,1fr);gap:1.8cqw;}
+  .score .cell{background:var(--panel);border:1px solid var(--border);border-radius:1.4cqh;padding:2.4cqh 2cqw;}
+  .score .cell .big{font-size:4.8cqh;font-weight:800;color:var(--accent2);line-height:1;}
+  .score .cell .lab{font-size:1.7cqh;color:var(--muted);margin-top:1cqh;line-height:1.4;}
+  .score .cell.g .big{color:var(--ok);}
+
+  ul.bul{list-style:none;display:flex;flex-direction:column;gap:1.7cqh;}
+  ul.bul li{position:relative;padding-left:2.4cqw;font-size:2.05cqh;line-height:1.5;color:var(--text);}
+  ul.bul li::before{content:"";position:absolute;left:0;top:.75em;width:1cqw;height:1cqw;border-radius:50%;background:var(--accent);}
+  ul.bul li .s{color:var(--muted);}
+
+  /* 내비게이션 */
+  .nav{position:absolute;bottom:2.6cqh;right:6cqw;display:flex;align-items:center;gap:1.4cqw;z-index:10;}
+  .nav button{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:.8cqh;
+    width:4cqh;height:4cqh;font-size:2cqh;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
+  .nav button:hover{background:var(--accent);color:#17122e;border-color:var(--accent);}
+  .counter{position:absolute;bottom:2.6cqh;left:6cqw;font-size:1.7cqh;color:var(--dim);font-weight:700;z-index:10;}
+  .counter b{color:var(--accent2);}
+  .progress{position:absolute;left:0;bottom:0;height:.5cqh;background:var(--accent);transition:width .35s ease;z-index:10;}
+  .brand{position:absolute;bottom:2.6cqh;left:50%;transform:translateX(-50%);font-size:1.5cqh;color:var(--dim);
+    letter-spacing:.14em;text-transform:uppercase;font-weight:700;z-index:10;}
+
+  .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:12px;color:#6b6790;
+    background:rgba(20,18,34,.85);border:1px solid #2a2746;border-radius:8px;padding:6px 14px;z-index:50;transition:opacity .5s;}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- 1 · 타이틀 -->
+  <section class="slide active">
+    <div class="shead"><span>보안 테스트 결과 보고</span><span class="tag">ARTEX · DVWA</span></div>
+    <div class="title-wrap">
+      <p class="kick">자율 침투 테스트 콘솔 검증</p>
+      <h1>ARTEX 자율 침투 테스트 콘솔<br>DVWA 모의해킹 수행 보고서</h1>
+      <p class="title-sub">ARTEX를 한글화 fork하여 구축 후 <b>GLM 5.3 Flash</b> 모델로 수행한 DVWA 모의해킹 —
+      작업 생성부터 라이브 재검증, 발견 등록(report_finding), 상세보고서까지
+      <b class="accent">전 파이프라인을 엔드투엔드로 완주</b>한 기록.</p>
+      <div class="title-meta">
+        <span>일시 · <b>2026-10-04 (KST)</b></span>
+        <span>대상 · <b>DVWA v1.10 (192.168.*.*)</b></span>
+        <span>모델 · <b>GLM 5.3 Flash</b></span>
+        <span>결과 · <b>15건 등록 완료</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · 개요 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">01 · 개요</span><span>Overview</span></div>
+    <h2><span class="n">01</span> 개요</h2>
+    <div class="body">
+      <div class="kpi">
+        <div class="box ok"><div class="v g">15</div><div class="k">confirmed 등록</div></div>
+        <div class="box crit"><div class="v c">3</div><div class="k">Critical</div></div>
+        <div class="box"><div class="v">2</div><div class="k">High</div></div>
+        <div class="box"><div class="v">8</div><div class="k">Medium</div></div>
+        <div class="box"><div class="v">2</div><div class="k">Low</div></div>
+      </div>
+      <div class="facts">
+        <div class="row"><span class="k">대상 사이트</span><span class="d">테스트용 DVWA v1.10 <em>Development</em> — <code>192.168.*.*</code> · Apache/PHP/MySQL · 보안레벨 <b>low</b></span></div>
+        <div class="row"><span class="k">목적</span><span class="d">ARTEX 구동 로직·기능의 엔드투엔드 검증 + DVWA 취약점 점검</span></div>
+        <div class="row"><span class="k">작업 흐름</span><span class="d">Task #1(지휘) → Task #2(실행) → <b>Task #3(등록 마감, 완료)</b></span></div>
+        <div class="row"><span class="k">최종 결과</span><span class="d"><span class="ok-ic">전 과정 정상 완료</span> — 라이브 재검증 → report_finding 15건 등록 → 상세보고서 5건</span></div>
+      </div>
+      <div class="callout">ARTEX는 <b>단일 대화 지시만으로</b> 작업을 자율 생성·실행·추적하고, <b>라이브 재검증</b>을 거쳐
+      발견된 취약점을 <b>정식 등록</b>하기까지 완주했다. 무료 사용량 소진 후 <b class="accent">유료 GLM 5.3 Flash</b>로 이어 재시작하여 완료되었다.</div>
+    </div>
+  </section>
+
+  <!-- 3 · 플랫폼 구성 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">02 · 플랫폼 구성</span><span>Architecture</span></div>
+    <h2><span class="n">02</span> ARTEX 콘솔/플랫폼 구성</h2>
+    <div class="body">
+      <p class="lead" style="max-width:100%">단일 콘솔이 <b>대화·작업·발견·트래픽·도구 실행·LLM 녹화·자산·차단</b>을 통합 제공하며,
+      <b class="accent">대화(Auto) 지시 → 워커 자율 실행 → 발견 정식 등록</b>이 끊김 없이 한 흐름으로 이어진다.</p>
+      <div class="arch">
+        <div class="hub">
+          <div class="hl">단일 콘솔 · ARTEX (버전·dev)</div>
+          <div class="chips">
+            <span class="chip hub">ARTEX 콘솔</span><span class="chip">대화</span><span class="chip">작업</span>
+            <span class="chip">발견</span><span class="chip">트래픽</span><span class="chip">도구 실행</span>
+            <span class="chip">LLM 녹화</span><span class="chip">자산</span><span class="chip">차단 규칙</span>
+          </div>
+        </div>
+        <div class="flow">
+          <div class="fnode"><span class="fi">1</span><b>대화 · Auto</b><span>작업 오케스트레이션<br>(생성·지휘·추적)</span></div>
+          <div class="farrow">→<small>지시</small></div>
+          <div class="fnode"><span class="fi">2</span><b>작업 워커</b><span>planner / worker가<br>도구를 자율 실행</span></div>
+          <div class="farrow">→<small>결과</small></div>
+          <div class="fnode reg"><span class="fi">3</span><b>발견 등록</b><span>report_finding으로<br>플랫폼에 정식 등록</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · 수행 과정 단계 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">03 · 수행 과정</span><span>Auto 판단 과정</span></div>
+    <h2><span class="n">03</span> 수행 과정 — Auto의 판단 흐름</h2>
+    <div class="body">
+      <div class="steps">
+        <div class="step"><span class="num">1</span><div><div class="t">지시 수신</div><div class="d">테스트용 DVWA 대상, 목적은 ARTEX 로직·기능 검증. 유료 모델로 전환해 중단 없이 진행.</div></div></div>
+        <div class="step"><span class="num">2</span><div><div class="t">기존 진척 확인</div><div class="d">백지 상태가 아니라 멈춰 있던 작업 두 개가 남아 있음을 확인 — 멈춘 지점에서 이어 진행.</div></div></div>
+        <div class="step"><span class="num">3</span><div><div class="t">증거 재확인</div><div class="d">이전 세션 증거 47개 확인, 핵심 4건(SQLi·RCE·웹셸·LFI) 유효 — 기록에만 의존하지 않고 직접 재확인.</div></div></div>
+        <div class="step"><span class="num">4</span><div><div class="t">라이브 재검증</div><div class="d"><code>admin/password</code> 로그인 성공, 보안레벨 low 확인 후 다섯 건을 실제 요청으로 다시 검증·전부 재현.</div></div></div>
+        <div class="step reg"><span class="num">5</span><div><div class="t">발견 등록</div><div class="d">자산 id=3 확인 후, 15건을 <code>report_finding</code>으로 플랫폼에 정식 등록.</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · 라이브 재검증 결과 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">03 · 라이브 재검증</span><span>Live Re-verification</span></div>
+    <h2><span class="n">03</span> 라이브 재검증 결과 <span style="font-size:1.9cqh;color:var(--muted);font-weight:600">(curl 기반, 본 세션)</span></h2>
+    <div class="body">
+      <table class="mini">
+        <thead><tr><th style="width:40%">검증 항목</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="k">로그인 (admin/password)</td><td>성공 — 302 + Welcome 문구</td></tr>
+          <tr><td class="k">보안레벨 low 설정</td><td>성공 — <code>&lt;em&gt;low&lt;/em&gt;</code></td></tr>
+          <tr><td class="k">SQLi UNION 덤프</td><td><span class="ok-ic">재현</span> — 5계정 MD5 해시 동일</td></tr>
+          <tr><td class="k">Command Injection</td><td><span class="ok-ic">재현</span> — <code>uid=33(www-data)</code></td></tr>
+          <tr><td class="k">업로드 웹셸</td><td><span class="ok-ic">재현</span> — 여전히 활성(<code>cmd=id</code> 응답)</td></tr>
+          <tr><td class="k">Reflected XSS</td><td><span class="ok-ic">재현</span> — 무인코딩 반사</td></tr>
+          <tr><td class="k">LFI <code>/etc/passwd</code></td><td><span class="ok-ic">재현</span> — 전체 열람</td></tr>
+          <tr><td class="k">디렉터리 리스팅</td><td><span class="ok-ic">재현</span> — <code>artex_shell.php</code> 노출</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 · 자동 파이프라인 / 가드레일 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">03 · 자동 파이프라인</span><span>Pipeline & Guardrails</span></div>
+    <h2><span class="n">03</span> 자동 파이프라인 · 가드레일</h2>
+    <div class="body">
+      <div class="callout">대화 컨텍스트에서 <code>report_finding</code> 직접 호출은 <b>"작업 컨텍스트 필요"로 정상 거부</b>된다.
+      설계대로 <code>spawn_task</code>(작업 3) 생성 → <code>add_task_hint</code>로 규격 인계 → <b>워커가 등록을 수행</b>하도록 흐름이 강제된다.</div>
+      <ul class="bul">
+        <li><b>작업 3 생성</b> — <code>spawn_task(source_task_ids=[1,2])</code>로 작업 1·2의 goal·hints·intent를 <b class="accent">상속</b></li>
+        <li><b>힌트 인계</b> — <code>add_task_hint</code>로 등록 규격 4건 주입(ids 13~16) · Critical 3 / High 2 / Medium 8 / Low 2</li>
+        <li><b>워커 실행</b> — 증거 검증 → 상세보고서 작성 → <b>report_finding 15건 등록 완료</b> · 작업 <b class="accent">done</b>(713초), 전건 confirmed</li>
+        <li><b>기획자 실시간 교정 훅</b> — 워커가 규격 밖(CSP 라이브 확인)으로 확장 시도하자 <b>Bash 차단 + 규격 반영 지시</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 · 공격 체인 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">04 · 공격 체인</span><span>Exploit Chains</span></div>
+    <h2><span class="n">04</span> 핵심 공격 체인</h2>
+    <div class="body">
+      <div class="chainwrap">
+        <div class="chain">
+          <div class="ct">Chain A · 자격증명 탈취</div>
+          <div class="seq"><span class="s">SQL Injection</span><span class="ar">→</span><span class="s">DB 계정·해시 덤프</span><span class="ar">→</span><span class="s">해시 크랙</span><span class="ar">→</span><span class="s">관리자/일반계정 로그인 재현</span></div>
+        </div>
+        <div class="chain">
+          <div class="ct">Chain B · 원격 코드 실행</div>
+          <div class="seq"><span class="s">파일 업로드 / 명령 인젝션</span><span class="ar">→</span><span class="s">웹셸·명령 실행</span><span class="ar">→</span><span class="s">www-data 권한 RCE</span></div>
+        </div>
+      </div>
+      <div class="callout ok"><b>크랙된 계정</b> (SQLi → 크랙 → 로그인 체인 검증 완료):
+      <code>admin/password</code> · <code>gordonb/abc123</code>(재로그인 성공) · <code>1337/charley</code> ·
+      <code>pablo/letmein</code> · <code>smithy/password</code> — 무솔트 MD5 저장.</div>
+    </div>
+  </section>
+
+  <!-- 8 · 발견 취약점 15건 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">04 · 발견 취약점</span><span>15 Findings</span></div>
+    <h2><span class="n">04</span> 발견 취약점 요약 <span style="font-size:1.9cqh;color:var(--muted);font-weight:600">(15건, 등록 완료)</span></h2>
+    <div class="body">
+      <table class="mini">
+        <thead><tr><th style="width:4%">#</th><th style="width:34%">취약점</th><th style="width:12%">등급</th><th>핵심 증거</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>SQL Injection — users 전체 덤프</td><td><span class="pill crit">Critical</span></td><td>UNION 덤프 → 5계정 MD5, 크랙·실로그인 재현</td></tr>
+          <tr><td>2</td><td>Command Injection → RCE</td><td><span class="pill crit">Critical</span></td><td><code>;id</code> → <code>uid=33(www-data)</code></td></tr>
+          <tr><td>3</td><td>Unrestricted File Upload → RCE</td><td><span class="pill crit">Critical</span></td><td>웹셸 업로드·실행 → www-data (재검증 시 활성)</td></tr>
+          <tr><td>4</td><td>File Inclusion (LFI + php://filter)</td><td><span class="pill high">High</span></td><td><code>/etc/passwd</code> 열람, 소스 base64 유출</td></tr>
+          <tr><td>5</td><td>Blind SQL Injection (시간기반)</td><td><span class="pill high">High</span></td><td><code>SLEEP(5)</code> → 5.003s vs 0.003s</td></tr>
+          <tr><td>6~8</td><td>Stored / Reflected / DOM XSS</td><td><span class="pill med">Medium ×3</span></td><td>영구 저장 · 무인코딩 반사 · <code>document.write</code></td></tr>
+          <tr><td>9~13</td><td>CSRF · Weak Session · Brute Force · CSP Bypass · JS 토큰 변조</td><td><span class="pill med">Medium ×5</span></td><td>토큰 무검증 · 순차 예측 · 무차단 · 외부소스 허용 · 서버 미검증</td></tr>
+          <tr><td>14~15</td><td>디렉터리 리스팅 · 설정/경로 노출</td><td><span class="pill low">Low ×2</span></td><td>uploads/ Index 노출 · captcha 설정파일 절대경로 노출</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 9 · 플랫폼 검증 결과 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">05 · 플랫폼 검증</span><span>Platform Verification</span></div>
+    <h2><span class="n">05</span> ARTEX 플랫폼 검증 결과</h2>
+    <div class="body">
+      <table class="mini">
+        <thead><tr><th style="width:30%">기능</th><th style="width:44%">테스트 내용</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr><td class="k">작업 오케스트레이션</td><td><code>list_tasks</code>로 부모·서브 상태 식별</td><td><span class="ok-ic">✓</span> paused 식별·인계</td></tr>
+          <tr><td class="k">그래프/결과 조회</td><td><code>get_task_graph</code>, <code>list_task_findings</code></td><td><span class="ok-ic">✓</span> 힌트·의도·진척 확인</td></tr>
+          <tr><td class="k">자산 관리</td><td><code>list_assets(id=3)</code> — DVWA 서비스 자산</td><td><span class="ok-ic">✓</span> 기술스택 지문 포함</td></tr>
+          <tr><td class="k">취약점 등록 가드레일</td><td>대화 컨텍스트 <code>report_finding</code> 직접 호출</td><td><span class="ok-ic">✓</span> 정상 거부</td></tr>
+          <tr><td class="k">서브태스크 생성·상속</td><td><code>spawn_task(source_task_ids=[1,2])</code></td><td><span class="ok-ic">✓</span> 작업 3 생성·상속</td></tr>
+          <tr><td class="k">워커 자동 등록</td><td>작업 3 워커가 <code>report_finding</code> 15건</td><td><span class="ok-ic">✓</span> 전건 confirmed</td></tr>
+          <tr><td class="k">기획자 실시간 교정 훅</td><td>워커의 힌트 외 확장 시도 차단</td><td><span class="ok-ic">✓</span> Bash 차단 + 규격 반영</td></tr>
+          <tr><td class="k">상세보고서</td><td><code>update_finding_report</code>(노드 19~23)</td><td><span class="ok-ic">✓</span> 5건 등록</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10 · DVWA vs ARTEX -->
+  <section class="slide">
+    <div class="shead"><span class="tag">06 · 커버리지</span><span>DVWA 1.10 vs ARTEX</span></div>
+    <h2><span class="n">06</span> DVWA 1.10 알려진 취약점 vs ARTEX 탐지</h2>
+    <div class="body">
+      <div class="score">
+        <div class="cell g"><div class="big">14 / 14</div><div class="lab">모듈 커버리지 (100%) — 이 인스턴스의 의도된 취약점 표면 전체 탐지</div></div>
+        <div class="cell"><div class="big">0</div><div class="lab">누락 (범위 내) — 단순 매칭이 아닌 익스플로잇·체이닝까지 실증</div></div>
+        <div class="cell"><div class="big">+1</div><div class="lab">모듈 외 보너스 — 디렉터리 리스팅(서버 설정 취약점) 자율 포착</div></div>
+        <div class="cell g"><div class="big">15</div><div class="lab">총 등록 (Critical 3 / High 2 / Medium 8 / Low 2), 전건 confirmed</div></div>
+      </div>
+      <div class="callout"><b>해석</b> — <code>captcha</code>처럼 의도된 경로가 막힌 경우에도 <b>대체 공격면(설정 정보노출)을 스스로 찾아내</b> 보고했고,
+      정답지 밖의 서버 설정 결함까지 추가 발견했다. 본 대상 기준 탐지 커버리지는 <b class="accent">사실상 100%</b>.</div>
+    </div>
+  </section>
+
+  <!-- 11 · 결론 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">07 · 결론</span><span>Conclusion</span></div>
+    <h2><span class="n">07</span> 결론</h2>
+    <div class="body">
+      <p class="lead" style="max-width:100%">이번 테스트에서 ARTEX는 <b>"DVWA를 해킹하라"는 한 마디 지시만으로</b> 다음을 스스로 해냈다.</p>
+      <ul class="bul">
+        <li>작업을 만들고, 워커를 돌리고, <b>진행 상황을 추적</b></li>
+        <li>이전에 찾아둔 취약점을 <b>직접 다시 확인</b>(라이브 재검증)</li>
+        <li>찾은 취약점 <b>15건을 플랫폼에 정식 등록</b>(상세보고서까지)</li>
+      </ul>
+      <div class="callout ok"><b>처음부터 끝까지 사람 손 없이 한 번에 완주</b>했다. 유료 <b>GLM 5.3 Flash</b>로 전환해
+      요청 제한에 걸려 멈추는 일 없이 전 과정이 매끄럽게 돌아갔고, <b class="accent">Critical 3건 포함 15건을 모두 확정 등록</b>했다.</div>
+    </div>
+  </section>
+
+  <!-- 12 · 방어 관점 -->
+  <section class="slide">
+    <div class="shead"><span class="tag">07 · 방어 관점</span><span>SOC Detection</span></div>
+    <h2><span class="n">07</span> 방어 관점 — 관제센터는 어떻게 알아챌까</h2>
+    <div class="body">
+      <p class="lead" style="max-width:100%"><b>"무엇으로 공격했는가"보다 "어떤 주체가 공격하는가"의 행위 지문</b>에 주목.
+      우회 난이도(공격자가 바꾸기 어려운 정도)가 높은 순.</p>
+      <table class="mini">
+        <thead><tr><th style="width:30%">탐지 특징</th><th>설명</th><th style="width:16%">우회 난이도</th></tr></thead>
+        <tbody>
+          <tr><td class="k">데이터 흐름 상관</td><td>서버 응답에서 얻은 값을 다음 요청 입력으로 재사용(덤프한 자격증명으로 즉시 로그인)</td><td><span class="pill crit">매우 어려움</span></td></tr>
+          <tr><td class="k">목표 지향 단계 전이</td><td>정찰 → 인증 → 열거 → 익스플로잇이 직전 성공에 조건부로 이어지는 진행</td><td><span class="pill high">어려움</span></td></tr>
+          <tr><td class="k">저소음·고정밀</td><td>적은 요청 수에도 민감 엔드포인트 적중률이 비정상적으로 높음</td><td><span class="pill med">보통</span></td></tr>
+          <tr><td class="k">단일 출발지·다벡터</td><td>동일 IP에서 서로 다른 공격 범주가 짧은 시간에 혼재</td><td><span class="pill low">낮음</span></td></tr>
+          <tr><td class="k">클라이언트 정체성 불일치</td><td>모바일 UA ↔ 데이터센터 IP, UA·TLS 지문 혼재 등</td><td><span class="pill low">낮음~보통</span></td></tr>
+        </tbody>
+      </table>
+      <div class="callout">응답을 읽고 다음 수를 결정하는 <b>"데이터 흐름 상관"이 가장 신뢰도 높은 단서</b>. 현실적으로는
+      <b class="accent">허니토큰</b>(유출→재사용 체인 포착) + <b>WAF 경보 체이닝</b> + <b>UEBA</b>로 보완한다.</div>
+    </div>
+  </section>
+
+  <!-- 13 · 클로징 -->
+  <section class="slide">
+    <div class="shead"><span>ARTEX · DVWA 모의해킹</span><span class="tag">End</span></div>
+    <div class="title-wrap">
+      <p class="kick">한 문장 요약</p>
+      <h1 style="font-size:4.6cqh">AI 자율 해킹은 <span class="accent">공격 문구가 아니라<br>행위 지문</span>으로 잡는다.</h1>
+      <p class="title-sub">ARTEX는 단일 지시로 전 파이프라인을 완주했고(15건 등록), 방어는 응답→재사용의
+      <b>데이터 흐름 상관</b>을 핵심 단서로 삼아 허니토큰·WAF 상관·UEBA로 보완해야 한다.</p>
+      <div class="title-meta">
+        <span>대상 DVWA는 보안 교육·검증 전용 환경입니다.</span>
+        <span>근거 · 테스트 세션 로그 + 콘솔 스크린샷(그림 1~3)</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="progress" id="progress"></div>
+  <div class="counter"><b id="cur">1</b> / <span id="tot">13</span></div>
+  <div class="brand">ARTEX 자율 침투 테스트 콘솔</div>
+  <div class="nav">
+    <button id="prev" aria-label="이전">‹</button>
+    <button id="next" aria-label="다음">›</button>
+  </div>
+</div>
+
+<div class="hint" id="hint">← → 또는 Space 로 이동 · F 전체화면</div>
+
+<script>
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0, n = slides.length;
+  document.getElementById('tot').textContent = n;
+  function show(k){
+    i = Math.max(0, Math.min(n-1, k));
+    slides.forEach(function(s,idx){ s.classList.toggle('active', idx===i); });
+    document.getElementById('cur').textContent = i+1;
+    document.getElementById('progress').style.width = ((i+1)/n*100) + '%';
+  }
+  function next(){ show(i+1); } function prev(){ show(i-1); }
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ show(0); } else if(e.key==='End'){ show(n-1); }
+    else if(e.key==='f'||e.key==='F'){ toggleFs(); }
+  });
+  // 클릭 좌/우 반 이동 (버튼/링크 제외)
+  document.getElementById('stage').addEventListener('click', function(e){
+    if(e.target.closest('.nav')||e.target.closest('a')||e.target.closest('button')) return;
+    var r = this.getBoundingClientRect();
+    if(e.clientX - r.left > r.width*0.5) next(); else prev();
+  });
+  // 터치 스와이프
+  var tx=null;
+  document.getElementById('stage').addEventListener('touchstart',function(e){ tx=e.touches[0].clientX; },{passive:true});
+  document.getElementById('stage').addEventListener('touchend',function(e){
+    if(tx===null) return; var dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>40){ dx<0?next():prev(); } tx=null;
+  },{passive:true});
+  function toggleFs(){ if(!document.fullscreenElement){ document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen(); } else { document.exitFullscreen&&document.exitFullscreen(); } }
+  setTimeout(function(){ var h=document.getElementById('hint'); if(h) h.style.opacity='0'; }, 4200);
+  show(0);
+</script>
+</body>
+</html>
