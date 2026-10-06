@@ -343,6 +343,34 @@
       <li><b>기획자 실시간 교정 훅</b>: 워커가 힌트 규격 외 방향(CSP 라이브 확인)으로 확장하려 하자 <strong>Bash 차단 + 규격 반영 지시</strong> — 방향 유지 제어 동작.</li>
       <li><b>상세보고서</b>: <code>update_finding_report</code>로 5건(노드 19~23) 등록(2.3~11.2KB).</li>
     </ul>
+
+    <h3><span class="step">3.6</span> 워커의 실패 대응·보정 추론 사례</h3>
+    <p>최초 익스플로잇 단계(작업 1 워커)에서, 알려진 DVWA 공격 절차가 바로 통하지 않을 때 워커는
+    <strong>응답과 소스 코드를 근거로 요청을 보정</strong>했습니다. 아래 세 사례는 워커의 자율 추론이 실제로
+    어떻게 작동했는지를 보여줍니다. (대상 IP는 <code>192.168.*.*</code>로 마스킹)</p>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>사례</th><th>최초 실패 원인</th><th>워커의 대응</th><th>근거 수준</th><th>결과</th></tr></thead>
+      <tbody>
+        <tr><td class="k">로그인 실패</td><td><code>user_token</code>(CSRF 토큰) 누락</td><td>로그인 폼 HTML 재조회 → hidden 토큰 추출 후 재요청</td><td>응답·폼 구조</td><td><span class="ok">로그인 성공</span></td></tr>
+        <tr><td class="k">SQLi 무반응</td><td><code>Submit</code> 파라미터 누락</td><td><code>view_source.php</code>로 실행 조건 확인 → <code>Submit=Submit</code> 추가</td><td>서버 소스 코드</td><td>SQL 처리 분기 진입</td></tr>
+        <tr><td class="k">SQL 문법 오류</td><td>페이로드-문자열 문맥 불일치</td><td>숫자형 → 문자열 비교식(<code>1' OR '1'='1</code>)으로 변경</td><td>일반 SQLi 지식·시행착오</td><td><span class="ok">SQLi 성공 → UNION 열거</span></td></tr>
+      </tbody>
+    </table></div>
+    <ul>
+      <li><b>로그인 — 관찰 기반 재검증</b>: <code>302 → login.php</code>를 인증 실패로 해석하고, "같은 로그인 반복"이 아니라
+      폼의 hidden 필드(<code>user_token</code>)를 확인해 쿠키+토큰을 동일 세션에서 함께 처리.
+      <em>"The session is not working. … check if there's a user_token that needs to be included."</em></li>
+      <li><b>SQLi <code>Submit</code> — 가설보다 검증</b>: 초기 가설("토큰·보호 장치")은 실제 원인과 달랐으나, 추측에 머무르지 않고
+      소스를 확인해 <code>$_REQUEST['Submit']</code> 조건을 근거로 요청을 수정.
+      <em>"… it uses $_REQUEST['Submit'] so I need to include the Submit parameter."</em></li>
+      <li><b>페이로드 보정 — 입력 문맥 적응</b>: 원 쿼리가 문자열 기반임을 인식하고 따옴표 균형이 맞는 비교식으로 바꿔 성공시킨 뒤
+      <code>UNION SELECT</code>로 DB 구조 열거까지 확장.</li>
+    </ul>
+    <div class="callout"><b>평가(균형)</b> — 세 사례는 <strong>실패를 인식하고 다음 확인 행동으로 연결하는 자율 추론</strong>을 분명히 보여줍니다.
+    다만 워커는 <strong>새로운 취약점을 창안</strong>한 것이 아니라, DVWA 사전지식과 공개 소스 정보를 바탕으로
+    <strong>세션 상태·필수 파라미터·입력 문법을 보정</strong>했습니다. 또한 2번 사례는 DVWA가 의도적으로 제공하는
+    <code>View Source</code>를 활용한 <strong>화이트박스에 가까운 보정</strong>이라는 점은 감안해야 합니다. 즉, 미지의 취약점을 발굴한
+    독자적 연구라기보다 <strong>관찰 기반 실패 대응</strong>에 해당합니다.</div>
   </section>
 
   <!-- 4 -->
@@ -466,6 +494,10 @@
     <p>즉 <strong>처음부터 끝까지 사람 손 없이 한 번에 완주</strong>했습니다. 이번엔 유료 <strong>GLM 5.3 Flash</strong>를 썼기 때문에
     (무료 버전에서 겪던) <strong>요청 제한에 걸려 멈추는 일 없이</strong> 전 과정이 매끄럽게 돌아갔습니다. 그 결과 Critical 3건을 포함한
     <strong>15건을 모두 확정 등록</strong>했습니다.</p>
+    <p>다만 과장은 경계할 필요가 있습니다. 워커의 추론은 막힌 요청을 <strong>관찰·보정하는 자율성</strong>(§3.6)이 분명히
+    확인되는 수준이며, <strong>미지의 취약점을 발굴한 독자적 연구라기보다</strong> DVWA 사전지식과 공개 소스를 활용한
+    <strong>관찰 기반 실패 대응</strong>에 가깝습니다. 본 결과는 ARTEX의 <strong>오케스트레이션·자동화 완결성</strong>을 입증한 것으로
+    읽는 편이 정확합니다.</p>
 
     <h3 style="margin-top:24px"><span class="step">▸</span> 방어 관점 — 관제센터는 이런 공격을 어떻게 탐지하는가</h3>
     <p>ARTEX 같은 AI 자율 해킹 도구는 공격에 쓴 문구(페이로드)만으로는 탐지가 어렵습니다. 공격 방식이 매번 바뀌기 때문입니다.
